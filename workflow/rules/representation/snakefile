@@ -1,0 +1,14 @@
+#############################
+# Rules for Representations #
+#############################
+
+rule kmer:
+
+    input:
+        "/rds/general/user/ns1920/home/project_2/data/acinetobacter_baumannii//SRR11318038.1.fastq"
+
+    output:
+        "/rds/general/user/ns1920/home/project_2/data/acinetobacter_baumannii/kmer/SRR11318038.1.res"
+
+    shell:
+        "kmc {input} {output} /rds/general/user/ns1920/home/project_2/data/acinetobacter_baumannii/kmer/"
