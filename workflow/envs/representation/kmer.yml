@@ -1,0 +1,14 @@
+name: kmer
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+  - imperial-college-research-computing
+dependencies:
+  - _libgcc_mutex=0.1=main
+  - bzip2=1.0.8=h7b6447c_0
+  - kmc=3.1.2rc1=h2d02072_0
+  - libgcc-ng=9.1.0=hdf63c60_0
+  - libstdcxx-ng=9.1.0=hdf63c60_0
+  - zlib=1.2.11=h7b6447c_3
+prefix: /rds/general/user/ns1920/home/anaconda3/envs/kmer
