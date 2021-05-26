@@ -35,7 +35,7 @@ for bacterium in BACTERIA:
 
 rule all:
     input:
-        expand(path_data + "{bacterium}/kmer/{strain_id}.txt",
+        expand(path_data + "{bacterium}/representation/kmer/{strain_id}.txt",
                bacterium=BACTERIA, strain_id=STRAIN_IDS[bacterium])
 
 #########
@@ -47,7 +47,7 @@ rule kmer_count:
         path_data + "{bacterium}/data/{strain_id}.fastq"
 
     output:
-        path_data + "{bacterium}/kmer/{strain_id}.intermediate"
+        path_data + "{bacterium}/representation/kmer/{strain_id}.intermediate"
 
     params:
         length = config["kmer_count"]["kmer_length"],
@@ -55,14 +55,14 @@ rule kmer_count:
         min = config["kmer_count"]["min_count"],
         max = config["kmer_count"]["max_count"],
         canonical_form = config["kmer_count"]["canonical_form"],
-        tmp_folder = path_data + "{bacterium}/kmer/"
+        tmp_folder = path_data + "{bacterium}/representation/kmer/"
 
     conda:
         "../../envs/representation/kmer.yml"
 
     shell:
         """
-        if ['{params.canonical_form}' = 'True']
+        if [ '{params.canonical_form}' = 'True' ]
            then
                kmc -k{params.length} -m{params.memory} -ci{params.min} -cx{params.max} {input} {output} {params.tmp_folder}
                touch {output}
@@ -74,10 +74,10 @@ rule kmer_count:
 
 rule kmer_count_to_txt:
     input:
-        path_data + "{bacterium}/kmer/{strain_id}.intermediate"
+        path_data + "{bacterium}/representation/kmer/{strain_id}.intermediate"
 
     output:
-        path_data + "{bacterium}/kmer/{strain_id}.txt"
+        path_data + "{bacterium}/representation/kmer/{strain_id}.txt"
 
     conda:
         "../../envs/representation/kmer.yml"
