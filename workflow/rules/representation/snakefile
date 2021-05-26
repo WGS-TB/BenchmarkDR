@@ -1,14 +1,87 @@
+import glob
+import getpass
+from pathlib import Path
+
+configfile: "config.yml"
+
+###########################
+# Configure Data Path     #
+# (do in config in future)#
+###########################
+
+
+user = getpass.getuser()
+path_data = str(Path("/rds/general/user/" + user +
+                     "/projects/bacterial_datasets/live/pipeline_data")) + "/"
+
+# specifiy bacteria (will later be done within overall config)
+BACTERIA = ["test_bacterium"]
+
+###############################
+# Get Strain IDs from Folder  #
+###############################
+
+STRAIN_IDS = {}
+
+for bacterium in BACTERIA:
+    file_list = glob.glob(path_data + bacterium + "/data/*.fastq")
+    STRAIN_IDS[bacterium] = [Path(f).stem for f in file_list]
+
 #############################
+#                           #
 # Rules for Representations #
+#                           #
 #############################
 
-rule kmer:
-
+rule all:
     input:
-        "/rds/general/user/ns1920/home/project_2/data/acinetobacter_baumannii//SRR11318038.1.fastq"
+        expand(path_data + "{bacterium}/kmer/{strain_id}.txt",
+               bacterium=BACTERIA, strain_id=STRAIN_IDS[bacterium])
+
+#########
+# KMERs #
+#########
+
+rule kmer_count:
+    input:
+        path_data + "{bacterium}/data/{strain_id}.fastq"
 
     output:
-        "/rds/general/user/ns1920/home/project_2/data/acinetobacter_baumannii/kmer/SRR11318038.1.res"
+        path_data + "{bacterium}/kmer/{strain_id}.intermediate"
+
+    params:
+        length = config["kmer_count"]["kmer_length"],
+        memory = config["kmer_count"]["memory"],
+        min = config["kmer_count"]["min_count"],
+        max = config["kmer_count"]["max_count"],
+        canonical_form = config["kmer_count"]["canonical_form"],
+        tmp_folder = path_data + "{bacterium}/kmer/"
+
+    conda:
+        "../../envs/representation/kmer.yml"
 
     shell:
-        "kmc {input} {output} /rds/general/user/ns1920/home/project_2/data/acinetobacter_baumannii/kmer/"
+        """
+        if ['{params.canonical_form}' = 'True']
+           then
+               kmc -k{params.length} -m{params.memory} -ci{params.min} -cx{params.max} {input} {output} {params.tmp_folder}
+               touch {output}
+           else
+               kmc -b -k{params.length} -m{params.memory} -ci{params.min} -cx{params.max} {input} {output} {params.tmp_folder}
+               touch {output}
+        fi
+        """
+
+rule kmer_count_to_txt:
+    input:
+        path_data + "{bacterium}/kmer/{strain_id}.intermediate"
+
+    output:
+        path_data + "{bacterium}/kmer/{strain_id}.txt"
+
+    conda:
+        "../../envs/representation/kmer.yml"
+
+    shell:
+        "kmc_dump -s {input} {output}"
+        # -s: sorted output
