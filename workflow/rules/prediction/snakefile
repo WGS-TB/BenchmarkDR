@@ -1,0 +1,10 @@
+# configfile: "config.yaml"
+
+rule lr_run:
+    input:
+        "data/gene_data.csv",
+        "data/AllLabels.csv",
+    output:
+        "ml/results.txt",
+    script:
+        "scripts/ml_methods.py"
