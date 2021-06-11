@@ -184,3 +184,5 @@ sratoolkit.2.11.0-centos_linux64/schema/vdb/built-in.vschema
 sratoolkit.2.11.0-centos_linux64/schema/vdb/vdb.vschema
 data/acinetobacter_baumannii/kmer/SRR11318038.1.res.kmc_pre
 data/acinetobacter_baumannii/kmer/SRR11318038.1.res.kmc_suf
+workflow/rules/representation/.snakemake
+.vscode/settings.json
