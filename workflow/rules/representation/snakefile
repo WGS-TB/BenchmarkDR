@@ -18,7 +18,7 @@ path_data = str(Path("/rds/general/user/" + user +
                      "/projects/bacterial_datasets/live/pipeline_data")) + "/"
 
 # specifiy bacteria (will later be done within overall config)
-BACTERIA = ["s_pyogenes", "test_bacterium"]
+BACTERIA = ["test_bacterium"]
 
 #######################################################################
 # Get Strain and Reference IDs from Folder (also other script later?) #
@@ -58,24 +58,30 @@ for bacterium in BACTERIA:
         if file_reference_fa:
             REFERENCE_IDS[bacterium] = Path(file_reference_fa[0]).stem
 
+## Function to combine all single files for bacterium to combine in matrix
 
-# def get_bacteria_strains():
-#     files = list()
-#     path = path_data + "{bacterium}/representation/kmer/{strain_id}.txt"
+def get_bacteria_strains(bacterium, representation):
+    files = list()
 
-#     for bacterium, strains in STRAINS_IDS.items():
-#         for strain_id in strains:
-#             files.append(path.format(bacterium=bacterium, strain_id=strain_id))
-#     return files
+    if representation == "kmer":
+        path = path_data + "{bacterium}/representation/kmer/{strain_id}.txt"
+
+    if representation == "snps":
+        path = path_data + "{bacterium}/representation/snps/{strain_id}.snps"
+
+    for bacterium, strains in STRAINS_IDS.items():
+        for strain_id in strains:
+            files.append(path.format(bacterium=bacterium, strain_id=strain_id))
+    return files
 
 # Function to only test for one bacterium
-def get_bacteria_strains(bacterium):
-    files = list()
-    path = path_data + "{bacterium}/representation/snps/{strain_id}.snps"
+# def get_bacteria_strains(bacterium):
+#     files = list()
+#     path = path_data + "{bacterium}/representation/snps/{strain_id}.snps"
 
-    for strain_id in STRAINS_IDS[bacterium]:
-        files.append(path.format(bacterium=bacterium, strain_id=strain_id))
-    return files
+#     for strain_id in STRAINS_IDS[bacterium]:
+#         files.append(path.format(bacterium=bacterium, strain_id=strain_id))
+#     return files
 
 #############################
 #                           #
@@ -83,16 +89,18 @@ def get_bacteria_strains(bacterium):
 #                           #
 #############################
 
-rule all:
-    input: get_bacteria_strains("test_bacterium")
+#rule all:
+#    input: get_bacteria_strains("test_bacterium")
 
-# rule all:
-#     input:
-#         expand(
-#             path_data + "{bacterium}/representation/kmer/0_matrix.csv", bacterium=BACTERIA)
+rule all:
+    input:
+        expand(
+            path_data + "{bacterium}/representation/snps/0_matrix.csv", bacterium=BACTERIA)
 
 ###########
+###########
 ## KMERs ##
+###########
 ###########
 
 #########
@@ -197,7 +205,7 @@ rule kmer_count_to_txt:
 rule txt_to_matrix:
     input:
         lambda wildcards: get_bacteria_strains(
-            '{bacterium}'.format(bacterium=wildcards.bacterium))
+            '{bacterium}'.format(bacterium=wildcards.bacterium), "kmer")
 
     output:
         path_data + "{bacterium}/representation/kmer/0_matrix.csv"
@@ -210,9 +218,14 @@ rule txt_to_matrix:
 
 
 ##########
+##########
 ## SNPs ##
 ##########
+##########
 
+###################################################
+# FASTQ to PILEUP (Alignment, SAM -> BAM, PILEUP) #
+###################################################
 
 rule fastq_to_pileup:
     input:
@@ -238,6 +251,10 @@ rule fastq_to_pileup:
         '''
 
 
+##################
+# PILEUP to SNPs #
+##################
+
 rule pileup_to_SNP:
     input:
         path_data + "{bacterium}/representation/snps/{strain_id}.pileup"
@@ -253,11 +270,30 @@ rule pileup_to_SNP:
         varscan mpileup2snp {input} > {output}
         '''
 
+##################
+# SNPs to MATRIX #
+##################
 
+rule snps_to_matrix:
+    input:
+        lambda wildcards: get_bacteria_strains(
+            '{bacterium}'.format(bacterium=wildcards.bacterium), "snps")
+
+    output:
+        path_data + "{bacterium}/representation/snps/0_matrix.csv"
+
+    conda:
+        "../../envs/representation/pandas.yml"
+
+    script:
+        "../../scripts/representation/snps_to_matrix.py"
+
+
+###########################
 ###########################
 ## Gene Presence Absence ##
 ###########################
-
+###########################
 
 # rule fastq_to_gene_presence_absence:
 #     input:
