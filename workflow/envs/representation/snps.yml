@@ -1,0 +1,33 @@
+name: snps
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+  - imperial-college-research-computing
+dependencies:
+  - _libgcc_mutex=0.1=conda_forge
+  - _openmp_mutex=4.5=1_gnu
+  - bwa=0.7.17=h5bf99c6_8
+  - bzip2=1.0.8=h7b6447c_0
+  - c-ares=1.17.1=h27cfd23_0
+  - ca-certificates=2021.5.25=h06a4308_1
+  - htslib=1.12=h9093b5e_1
+  - krb5=1.19.1=h3535a68_0
+  - libcurl=7.77.0=h2574ce0_0
+  - libdeflate=1.7=h27cfd23_5
+  - libedit=3.1.20210216=h27cfd23_1
+  - libev=4.33=h7b6447c_0
+  - libgcc-ng=9.3.0=h2828fa1_19
+  - libgomp=9.3.0=h2828fa1_19
+  - libnghttp2=1.43.0=h812cca2_0
+  - libssh2=1.9.0=h1ba5d50_1
+  - libstdcxx-ng=9.3.0=h6de172a_19
+  - ncurses=6.2=he6710b0_1
+  - openjdk=8.0.152=h7b6447c_3
+  - openssl=1.1.1k=h27cfd23_0
+  - perl=5.26.2=h14c3975_0
+  - samtools=1.12=h9aed4be_1
+  - varscan=2.4.4=hdfd78af_1
+  - xz=5.2.5=h7b6447c_0
+  - zlib=1.2.11=h7b6447c_3
+prefix: /rds/general/user/ns1920/home/anaconda3/envs/snps

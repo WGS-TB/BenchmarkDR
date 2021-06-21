@@ -1,8 +1,11 @@
 import glob
 import getpass
 from pathlib import Path
+import os
 
+os.chdir("/rds/general/user/ns1920/home/project_2/workflow/rules/representation")
 configfile: "config.yml"
+
 
 ###########################
 # Configure Data Path     #
@@ -17,10 +20,10 @@ path_data = str(Path("/rds/general/user/" + user +
 # specifiy bacteria (will later be done within overall config)
 BACTERIA = ["s_pyogenes", "test_bacterium"]
 
-#########################################################
+#######################################################################
 # Get Strain and Reference IDs from Folder (also other script later?) #
-# and function to replace expand                        #
-#########################################################
+# and function to replace expand                                      #
+#######################################################################
 
 STRAINS_IDS = {}
 REFERENCE_IDS = {}
@@ -46,8 +49,14 @@ for bacterium in BACTERIA:
             STRAINS_IDS[bacterium] = [Path(f).stem for f in file_list_fa]
 
     # reference genomes
-    file_reference = glob.glob(path_data + bacterium + "/reference/*")
-    REFERENCE_IDS[bacterium] = Path(file_reference[0]).stem
+    file_reference_fna = glob.glob(path_data + bacterium + "/reference/*.fna")
+    if file_reference_fna:
+        REFERENCE_IDS[bacterium] = Path(file_reference_fna[0]).stem
+
+    else:
+        file_reference_fa = glob.glob(path_data + bacterium + "/reference/*.fna")
+        if file_reference_fa:
+            REFERENCE_IDS[bacterium] = Path(file_reference_fa[0]).stem
 
 
 # def get_bacteria_strains():
@@ -62,12 +71,11 @@ for bacterium in BACTERIA:
 # Function to only test for one bacterium
 def get_bacteria_strains(bacterium):
     files = list()
-    path = path_data + "{bacterium}/representation/kmer/{strain_id}.txt"
+    path = path_data + "{bacterium}/representation/snps/{strain_id}.snps"
 
     for strain_id in STRAINS_IDS[bacterium]:
         files.append(path.format(bacterium=bacterium, strain_id=strain_id))
     return files
-
 
 #############################
 #                           #
@@ -206,17 +214,67 @@ rule txt_to_matrix:
 ##########
 
 
-# rule fastq_to_SNP:
+rule fastq_to_pileup:
+    input:
+        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq",
+        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq",
+        reference = lambda wildcards: "{path_data}{bacterium}/reference/{reference_id}.fna".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
+
+    output:
+        temp(path_data + "{bacterium}/representation/snps/{strain_id}.pileup")
+
+    params:
+        reference_folder = lambda wildcards: "{path_data}{bacterium}/reference/index".format(path_data=path_data, bacterium=wildcards.bacterium),
+        reference = lambda wildcards: "{path_data}{bacterium}/reference/index/{bacterium}".format(path_data=path_data, bacterium=wildcards.bacterium)
+
+    conda:
+        "../../envs/representation/snps.yml"
+
+    shell:
+        '''
+         mkdir -p {params.reference_folder}
+         bwa index -p {params.reference} {input.reference}
+         bwa mem {params.reference} {input.read_1} {input.read_2} | samtools view -b -q 1 - | samtools sort - | samtools mpileup -f {input.reference} - > {output}
+        '''
+
+
+rule pileup_to_SNP:
+    input:
+        path_data + "{bacterium}/representation/snps/{strain_id}.pileup"
+
+    output:
+        path_data + "{bacterium}/representation/snps/{strain_id}.snps"
+
+    conda:
+        "../../envs/representation/snps.yml"
+
+    shell:
+        '''
+        varscan mpileup2snp {input} > {output}
+        '''
+
+
+###########################
+## Gene Presence Absence ##
+###########################
+
+
+# rule fastq_to_gene_presence_absence:
 #     input:
 #         read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq",
 #         read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq",
-#         reference = path_data + "{bacterium}/reference/" + REFERENCE_IDS{bacterium}
+#         reference = lambda wildcards: "{path_data}{bacterium}/reference/{reference_id}.fna".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
 
 #     output:
-#         path_data + "{bacterium}/representation/kmer/0_matrix.csv"
+#         path_data + "{bacterium}/representation/gene_presence_absence/{strain_id}"
+
+#     params:
+#         reference = lambda wildcards: "{path_data}{bacterium}/reference/index/{bacterium}".format(path_data=path_data, bacterium=wildcards.bacterium)
 
 #     conda:
-#         "../../envs/representation/snps.yml"
+#         "../../envs/representation/gene_presence_absence.yml"
 
 #     shell:
-#         "bwa mem {input.reference} {input.read_1} {input.read_2} | samtools view -S -b | samtools sort -"
+#         '''
+         
+#         '''
