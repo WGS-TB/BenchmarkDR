@@ -1,0 +1,129 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	ml_run
+	1
+Resources before job selection: {'_cores': 1, '_nodes': 9223372036854775807}
+Ready jobs (1):
+	ml_run
+Select jobs to execute...
+Selected jobs (1):
+	ml_run
+Resources after job selection: {'_cores': 0, '_nodes': 9223372036854775806}
+
+[Tue Jun 22 15:10:21 2021]
+rule ml_run:
+    input: data/gene_data.csv, data/AllLabels.csv
+    output: ml/results.csv, ml/lr.pkl, ml/rf.pkl
+    jobid: 0
+
+Full Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1511, in open_local_file
+    stats = os.stat(localfile)
+FileNotFoundError: [Errno 2] No such file or directory: '/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/scripts/ml_run.py lr'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2357, in run_wrapper
+    run(
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 22, in __rule_ml_run
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/script.py", line 913, in script
+    path, source, language = get_source(path, basedir, wildcards, params)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/script.py", line 848, in get_source
+    with urlopen(sourceurl) as source:
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 222, in urlopen
+    return opener.open(url, data, timeout)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 525, in open
+    response = self._open(req, data)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 542, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 502, in _call_chain
+    result = func(*args)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1489, in file_open
+    return self.open_local_file(req)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1528, in open_local_file
+    raise URLError(exp)
+urllib.error.URLError: <urlopen error [Errno 2] No such file or directory: '/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/scripts/ml_run.py lr'>
+
+[Tue Jun 22 15:10:22 2021]
+Error in rule ml_run:
+    jobid: 0
+    output: ml/results.csv, ml/lr.pkl, ml/rf.pkl
+
+Full Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1511, in open_local_file
+    stats = os.stat(localfile)
+FileNotFoundError: [Errno 2] No such file or directory: '/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/scripts/ml_run.py lr'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2357, in run_wrapper
+    run(
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 22, in __rule_ml_run
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/script.py", line 913, in script
+    path, source, language = get_source(path, basedir, wildcards, params)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/script.py", line 848, in get_source
+    with urlopen(sourceurl) as source:
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 222, in urlopen
+    return opener.open(url, data, timeout)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 525, in open
+    response = self._open(req, data)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 542, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 502, in _call_chain
+    result = func(*args)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1489, in file_open
+    return self.open_local_file(req)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1528, in open_local_file
+    raise URLError(exp)
+urllib.error.URLError: <urlopen error [Errno 2] No such file or directory: '/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/scripts/ml_run.py lr'>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 574, in _callback
+    raise ex
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/concurrent/futures/thread.py", line 57, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 560, in cached_or_run
+    run_func(*args)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2390, in run_wrapper
+    raise RuleException(
+snakemake.exceptions.RuleException: URLError in line 13 of /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile:
+<urlopen error [Errno 2] No such file or directory: '/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/scripts/ml_run.py lr'>
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2357, in run_wrapper
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 13, in __rule_ml_run
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 222, in urlopen
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 525, in open
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 542, in _open
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 502, in _call_chain
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1489, in file_open
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1528, in open_local_file
+
+RuleException:
+URLError in line 13 of /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile:
+<urlopen error [Errno 2] No such file or directory: '/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/scripts/ml_run.py lr'>
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2357, in run_wrapper
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 13, in __rule_ml_run
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 222, in urlopen
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 525, in open
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 542, in _open
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 502, in _call_chain
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1489, in file_open
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/urllib/request.py", line 1528, in open_local_file
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 574, in _callback
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/concurrent/futures/thread.py", line 57, in run
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 560, in cached_or_run
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2390, in run_wrapper
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/.snakemake/log/2021-06-22T151021.546745.snakemake.log
+unlocking
+removing lock
+removing lock
+removed all locks

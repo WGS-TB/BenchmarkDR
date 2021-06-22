@@ -1,0 +1,11 @@
+Full Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/__init__.py", line 599, in snakemake
+    workflow.include(
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/workflow.py", line 1155, in include
+    exec(compile(code, snakefile, "exec"), self.globals)
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 14, in <module>
+NameError: name 'METHODS' is not defined
+
+NameError in line 11 of /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile:
+name 'METHODS' is not defined
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 11, in <module>

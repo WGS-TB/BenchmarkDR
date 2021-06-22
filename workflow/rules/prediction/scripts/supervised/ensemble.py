@@ -10,17 +10,14 @@ def dt(X_train, X_test, y_train, y_test):
     print("_______________________________")
     return accuracy
 
-def rf(X_train, X_test, y_train, y_test):
+def rf(X_train, y_train):
     from sklearn.ensemble import RandomForestClassifier
     print("Fitting RF...")
 
-    clf = RandomForestClassifier(n_estimators=140, min_samples_split=4, bootstrap=False, max_depth=50)
+    model = RandomForestClassifier(n_estimators=140, min_samples_split=4, bootstrap=False, max_depth=50)
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf
 
 def extratree(X_train, X_test, y_train, y_test):
     from sklearn.ensemble import ExtraTreesClassifier

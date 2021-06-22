@@ -1,11 +1,31 @@
 import pandas as pd
 import numpy as np
+import sys, getopt
 from sklearn.model_selection import train_test_split
 
-def model_run():
+def argCheck():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "d:l:", ["dfile=", "lfile="])
+    except getopt.GetoptError as err:
+        print(err)
+        usage()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-d", "--dfile"):
+            datafile = arg
+        elif opt in ("-l", "--lfile"):
+            labelfile = arg
+    methods = sys.argv[5:]
+    print("Data file = ", datafile)
+    print("Label file = ", labelfile)
+    print("Running these methods = ", methods)
+
+    return datafile, labelfile, methods
+
+def model_run(datafile, labelfile, methods):
     from support import (preprocess, saveObject)
     from evaluation import (evaluate, CVFolds, crossValidate)
-    data, labels = preprocess(data = snakemake.input[0], label = snakemake.input[1])
+    data, labels = preprocess(data = datafile, label = labelfile)
     
     ## TODO output csv and txt with evaluation scores etc.
     df_res = pd.DataFrame([], index = labels.columns, columns = ['lr', 'lda', 'svm', 'rf', 'ingot', 'lrcv'])
@@ -27,10 +47,10 @@ def model_run():
 
         from supervised.linear_model import lr
         model, clf = lr(X_train, y_train)
-        evaluate(clf, X_test, y_test)
-        folds = CVFolds()
-        crossValidate(model, X_train, y_train, folds)
-        saveObject(model, snakemake.output[1])
+        # evaluate(clf, X_test, y_test)
+        # folds = CVFolds()
+        # crossValidate(model, X_train, y_train, folds)
+        saveObject(model, "ml/lr.pkl")
 
         # from supervised.linear_model import lrcv
         # accuracy = lrcv(X_train, X_test, y_train, y_test)
@@ -43,9 +63,12 @@ def model_run():
         # accuracy = svm(X_train, X_test, y_train, y_test)
         # df_res.loc[[drug], ['svm']] = accuracy
         
-        # from supervised.ensemble import rf
-        # accuracy = rf(X_train, X_test, y_train, y_test)
-        # df_res.loc[[drug], ['rf']] = accuracy
+        from supervised.ensemble import rf
+        model, clf = rf(X_train, y_train)
+        # evaluate(clf, X_test, y_test)
+        # folds = CVFolds()
+        # crossValidate(model, X_train, y_train, folds)
+        saveObject(model, "ml/rf.pkl")
 
         # from supervised.ensemble import dt
         # accuracy = dt(X_train, X_test, y_train, y_test)
@@ -64,6 +87,5 @@ def model_run():
 
         break
 
-    df_res.to_csv(snakemake.output[0])
-
-model_run()
+datafile, labelfile, methods = argCheck()
+model_run(datafile, labelfile, methods)
