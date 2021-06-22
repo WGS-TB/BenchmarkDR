@@ -1,0 +1,30 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job counts:
+	count	jobs
+	1	ml_run
+	1
+Resources before job selection: {'_cores': 1, '_nodes': 9223372036854775807}
+Ready jobs (1):
+	ml_run
+Select jobs to execute...
+Selected jobs (1):
+	ml_run
+Resources after job selection: {'_cores': 0, '_nodes': 9223372036854775806}
+
+[Tue Jun 22 14:32:27 2021]
+rule ml_run:
+    input: data/gene_data.csv, data/AllLabels.csv
+    output: ml/results.csv, ml/lr.pkl
+    jobid: 0
+
+[Tue Jun 22 14:33:06 2021]
+Finished job 0.
+1 of 1 steps (100%) done
+Complete log: /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/.snakemake/log/2021-06-22T143227.469679.snakemake.log
+unlocking
+removing lock
+removing lock
+removed all locks
