@@ -97,6 +97,41 @@ rule all:
         expand(
             path_data + "{bacterium}/representation/snps/0_matrix.csv", bacterium=BACTERIA)
 
+
+###########
+###########
+## UTILS ##
+###########
+###########
+
+###################
+# Alignment (BAM) #
+###################
+
+rule fastq_to_bam:
+    input:
+        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq",
+        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq",
+        reference = lambda wildcards: "{path_data}{bacterium}/reference/{reference_id}.fna".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
+
+    output:
+        temp(path_data + "{bacterium}/representation/alignment/{strain_id}.bam")
+
+    params:
+        reference_folder = lambda wildcards: "{path_data}{bacterium}/reference/index".format(path_data=path_data, bacterium=wildcards.bacterium),
+        reference = lambda wildcards: "{path_data}{bacterium}/reference/index/{bacterium}".format(path_data=path_data, bacterium=wildcards.bacterium)
+
+    conda:
+        "../../envs/representation/snps.yml"
+
+    shell:
+        '''
+         mkdir -p {params.reference_folder}
+         bwa index -p {params.reference} {input.reference}
+         bwa mem {params.reference} {input.read_1} {input.read_2} | samtools view -b -q 1 - | samtools sort - -o {output}
+        '''
+
+
 ###########
 ###########
 ## KMERs ##
@@ -229,25 +264,18 @@ rule txt_to_matrix:
 
 rule fastq_to_pileup:
     input:
-        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq",
-        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq",
+        bam = path_data + "{bacterium}/representation/alignment/{strain_id}.bam",
         reference = lambda wildcards: "{path_data}{bacterium}/reference/{reference_id}.fna".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
 
     output:
         temp(path_data + "{bacterium}/representation/snps/{strain_id}.pileup")
-
-    params:
-        reference_folder = lambda wildcards: "{path_data}{bacterium}/reference/index".format(path_data=path_data, bacterium=wildcards.bacterium),
-        reference = lambda wildcards: "{path_data}{bacterium}/reference/index/{bacterium}".format(path_data=path_data, bacterium=wildcards.bacterium)
 
     conda:
         "../../envs/representation/snps.yml"
 
     shell:
         '''
-         mkdir -p {params.reference_folder}
-         bwa index -p {params.reference} {input.reference}
-         bwa mem {params.reference} {input.read_1} {input.read_2} | samtools view -b -q 1 - | samtools sort - | samtools mpileup -f {input.reference} - > {output}
+        samtools mpileup -f {input.reference} {input.bam} > {output}
         '''
 
 
