@@ -27,9 +27,6 @@ def model_run(datafile, labelfile, methods):
     from evaluation import (evaluate, CVFolds, crossValidate)
     data, labels = preprocess(data = datafile, label = labelfile)
     
-    ## TODO output csv and txt with evaluation scores etc.
-    df_res = pd.DataFrame([], index = labels.columns, columns = ['lr', 'lda', 'svm', 'rf', 'ingot', 'lrcv'])
-
     for drug in labels.columns:
         print('Analysing {0}'.format(drug))
 
@@ -39,19 +36,20 @@ def model_run(datafile, labelfile, methods):
 
         X = data
         X = X.loc[~na_index,:]
-        X = np.sign(X)
+        # X = np.sign(X)
 
         print(X.shape)
         print(y.shape)
         
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42, shuffle=True)
 
-        from supervised.linear_model import lr
-        model, clf = lr(X_train, y_train)
-        evaluate(clf, X_test, y_test)
-        folds = CVFolds()
-        crossValidate(model, X_train, y_train, folds)
-        # saveObject(model, "ml/lr.pkl")
+        if "lr" in methods:
+            from supervised.linear_model import lr
+            model, clf = lr(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/lr.pkl")
 
         # from supervised.linear_model import lrcv
         # accuracy = lrcv(X_train, X_test, y_train, y_test)
@@ -64,19 +62,21 @@ def model_run(datafile, labelfile, methods):
         # accuracy = svm(X_train, X_test, y_train, y_test)
         # df_res.loc[[drug], ['svm']] = accuracy
         
-        from supervised.ensemble import rf
-        model, clf = rf(X_train, y_train)
-        evaluate(clf, X_test, y_test)
-        folds = CVFolds()
-        crossValidate(model, X_train, y_train, folds)
-        # saveObject(model, "ml/rf.pkl")
+        if "rf" in methods:
+            from supervised.ensemble import rf
+            model, clf = rf(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/rf.pkl")
 
-        from supervised.svm import svm
-        model, clf = svm(X_train, y_train)
-        evaluate(clf, X_test, y_test)
-        folds = CVFolds()
-        crossValidate(model, X_train, y_train, folds)
-        # saveObject(model, "ml/svm.pkl")
+        if "svm" in methods:
+            from supervised.svm import svm
+            model, clf = svm(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/svm.pkl")
 
         # from supervised.ensemble import dt
         # accuracy = dt(X_train, X_test, y_train, y_test)
@@ -96,6 +96,8 @@ def model_run(datafile, labelfile, methods):
         # folds = CVFolds()
         # crossValidate(model, X_train, y_train, folds)
         # saveObject(model, "ml/ingot.pkl")
+
+        break
 
 datafile, labelfile, methods = argCheck()
 model_run(datafile, labelfile, methods)

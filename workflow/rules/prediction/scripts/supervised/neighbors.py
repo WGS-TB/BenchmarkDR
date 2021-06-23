@@ -1,23 +1,17 @@
-def knn(X_train, X_test, y_train, y_test):
+def knn(X_train, y_train):
     from sklearn.neighbors import KNeighborsClassifier
     print("Fitting KNN...")
 
-    clf = KNeighborsClassifier()
+    model = KNeighborsClassifier()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf
 
-def ncc(X_train, X_test, y_train, y_test):
+def ncc(X_train, y_train):
     from sklearn.neighbors import NearestCentroid
     print("Fitting NearestCentroid...")
 
-    clf = NearestCentroid()
+    model = NearestCentroid()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf

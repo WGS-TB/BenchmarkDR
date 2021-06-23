@@ -7,29 +7,23 @@ def lr(X_train, y_train):
 
     return model, clf
 
-def lrcv(X_train, X_test, y_train, y_test):
+def lrcv(X_train, y_train):
     from sklearn.linear_model import LogisticRegressionCV
     
     print("Fitting LR CV...")
 
     cv = crossValidation()
 
-    clf = LogisticRegressionCV(cv=cv, penalty='l2', solver='newton-cg')
+    model = LogisticRegressionCV(cv=cv, penalty='l2', solver='newton-cg')
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf
 
-def sgd(X_train, X_test, y_train, y_test):
+def sgd(X_train, y_train):
     from sklearn.linear_model import SGDClassifier
     print("Fitting SGD...")
 
-    clf = SGDClassifier()
+    model = SGDClassifier()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf

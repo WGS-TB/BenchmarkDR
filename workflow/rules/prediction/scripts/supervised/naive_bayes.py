@@ -1,23 +1,17 @@
-def gnb(X_train, X_test, y_train, y_test):
+def gnb(X_train, y_train):
     from sklearn.naive_bayes import GaussianNB
     print("Fitting GaussianNB...")
 
-    clf = GaussianNB(C=0.1, penalty='l2', solver='newton-cg')
+    model = GaussianNB()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf
 
-def cnb(X_train, X_test, y_train, y_test):
+def cnb(X_train, y_train):
     from sklearn.naive_bayes import ComplementNB
     print("Fitting ComplementNB...")
 
-    clf = ComplementNB(C=0.1, penalty='l2', solver='newton-cg')
+    model = ComplementNB()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf

@@ -1,14 +1,11 @@
-def dt(X_train, X_test, y_train, y_test):
+def dt(X_train, y_train):
     from sklearn.tree import DecisionTreeClassifier
     print("Fitting DT...")
 
-    clf = DecisionTreeClassifier()
+    model = DecisionTreeClassifier()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf
 
 def rf(X_train, y_train):
     from sklearn.ensemble import RandomForestClassifier
@@ -19,38 +16,29 @@ def rf(X_train, y_train):
 
     return model, clf
 
-def extratree(X_train, X_test, y_train, y_test):
+def extratree(X_train, y_train):
     from sklearn.ensemble import ExtraTreesClassifier
     print("Fitting ExtraTrees...")
 
-    clf = ExtraTreesClassifier()
+    model = ExtraTreesClassifier()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf
 
-def adaboost(X_train, X_test, y_train, y_test):
+def adaboost(X_train, y_train):
     from sklearn.ensemble import AdaBoostClassifier
     print("Fitting AdaBoost...")
 
-    clf = AdaBoostClassifier()
+    model = AdaBoostClassifier()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf
 
-def gbt(X_train, X_test, y_train, y_test):
+def gbt(X_train, y_train):
     from sklearn.ensemble import GradientBoostingClassifier
     print("Fitting GBT...")
 
-    clf = GradientBoostingClassifier()
+    model = GradientBoostingClassifier()
+    clf = model.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-    return accuracy
+    return model, clf
