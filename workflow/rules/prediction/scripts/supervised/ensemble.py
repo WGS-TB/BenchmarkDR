@@ -16,7 +16,7 @@ def rf(X_train, y_train):
 
     return model, clf
 
-def extratree(X_train, y_train):
+def extratrees(X_train, y_train):
     from sklearn.ensemble import ExtraTreesClassifier
     print("Fitting ExtraTrees...")
 

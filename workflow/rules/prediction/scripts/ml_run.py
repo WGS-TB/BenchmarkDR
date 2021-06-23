@@ -51,16 +51,29 @@ def model_run(datafile, labelfile, methods):
             crossValidate(model, X_train, y_train, folds)
             saveObject(model, "ml/lr.pkl")
 
-        # from supervised.linear_model import lrcv
-        # accuracy = lrcv(X_train, X_test, y_train, y_test)
-        # df_res.loc[[drug], ['lrcv']] = accuracy
+        if "lr" in methods:
+            from supervised.linear_model import sgd
+            model, clf = sgd(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/sgd.pkl")
 
-        # from discriminant_analysis import lda
-        # accuracy = lda(X_train, X_test, y_train, y_test)
-        # df_res.loc[[drug], ['lda']] = accuracy
+        if "lda" in methods:
+            from supervised.discriminant_analysis import lda
+            model, clf = lda(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/lda.pkl")
 
-        # accuracy = svm(X_train, X_test, y_train, y_test)
-        # df_res.loc[[drug], ['svm']] = accuracy
+        if "qda" in methods:
+            from supervised.discriminant_analysis import qda
+            model, clf = qda(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/qda.pkl")
         
         if "rf" in methods:
             from supervised.ensemble import rf
@@ -70,6 +83,38 @@ def model_run(datafile, labelfile, methods):
             crossValidate(model, X_train, y_train, folds)
             saveObject(model, "ml/rf.pkl")
 
+        if "dt" in methods:
+            from supervised.ensemble import dt
+            model, clf = dt(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/dt.pkl")
+
+        if "et" in methods:
+            from supervised.ensemble import extratrees
+            model, clf = extratrees(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/et.pkl")
+
+        if "adb" in methods:
+            from supervised.ensemble import adaboost
+            model, clf = adaboost(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/adb.pkl")
+
+        if "gbt" in methods:
+            from supervised.ensemble import gbt
+            model, clf = gbt(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/gbt.pkl")
+
         if "svm" in methods:
             from supervised.svm import svm
             model, clf = svm(X_train, y_train)
@@ -78,17 +123,37 @@ def model_run(datafile, labelfile, methods):
             crossValidate(model, X_train, y_train, folds)
             saveObject(model, "ml/svm.pkl")
 
-        # from supervised.ensemble import dt
-        # accuracy = dt(X_train, X_test, y_train, y_test)
+        if "gnb" in methods:
+            from supervised.naive_bayes import gnb
+            model, clf = gnb(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/gnb.pkl")
+
+        if "cnb" in methods:
+            from supervised.naive_bayes import cnb
+            model, clf = cnb(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/cnb.pkl")
+
+        if "knn" in methods:
+            from supervised.neighbors import knn
+            model, clf = knn(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds()
+            crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/knn.pkl")
         
-        # from supervised.ensemble import extratree
-        # accuracy = extratree(X_train, X_test, y_train, y_test)
-
-        # from supervised.ensemble import adaboost
-        # accuracy = adaboost(X_train, X_test, y_train, y_test)
-
-        # from supervised.ensemble import gbt
-        # accuracy = gbt(X_train, X_test, y_train, y_test)
+        if "ncc" in methods:
+            from supervised.neighbors import ncc
+            model, clf = ncc(X_train, y_train)
+            evaluate(clf, X_test, y_test)
+            # folds = CVFolds()
+            # crossValidate(model, X_train, y_train, folds)
+            saveObject(model, "ml/ncc.pkl")
 
         # from supervised.specials import ingot
         # model, clf = ingot(X_train, y_train)
