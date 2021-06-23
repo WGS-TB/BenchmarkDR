@@ -39,6 +39,7 @@ def model_run(datafile, labelfile, methods):
 
         X = data
         X = X.loc[~na_index,:]
+        X = np.sign(X)
 
         print(X.shape)
         print(y.shape)
@@ -47,10 +48,10 @@ def model_run(datafile, labelfile, methods):
 
         from supervised.linear_model import lr
         model, clf = lr(X_train, y_train)
-        # evaluate(clf, X_test, y_test)
-        # folds = CVFolds()
-        # crossValidate(model, X_train, y_train, folds)
-        saveObject(model, "ml/lr.pkl")
+        evaluate(clf, X_test, y_test)
+        folds = CVFolds()
+        crossValidate(model, X_train, y_train, folds)
+        # saveObject(model, "ml/lr.pkl")
 
         # from supervised.linear_model import lrcv
         # accuracy = lrcv(X_train, X_test, y_train, y_test)
@@ -65,10 +66,17 @@ def model_run(datafile, labelfile, methods):
         
         from supervised.ensemble import rf
         model, clf = rf(X_train, y_train)
-        # evaluate(clf, X_test, y_test)
-        # folds = CVFolds()
-        # crossValidate(model, X_train, y_train, folds)
-        saveObject(model, "ml/rf.pkl")
+        evaluate(clf, X_test, y_test)
+        folds = CVFolds()
+        crossValidate(model, X_train, y_train, folds)
+        # saveObject(model, "ml/rf.pkl")
+
+        from supervised.svm import svm
+        model, clf = svm(X_train, y_train)
+        evaluate(clf, X_test, y_test)
+        folds = CVFolds()
+        crossValidate(model, X_train, y_train, folds)
+        # saveObject(model, "ml/svm.pkl")
 
         # from supervised.ensemble import dt
         # accuracy = dt(X_train, X_test, y_train, y_test)
@@ -82,10 +90,12 @@ def model_run(datafile, labelfile, methods):
         # from supervised.ensemble import gbt
         # accuracy = gbt(X_train, X_test, y_train, y_test)
 
-        # accuracy = ingot(X_train, X_test, y_train, y_test)
-        # df_res.loc[[drug], ['ingot']] = accuracy
-
-        break
+        # from supervised.specials import ingot
+        # model, clf = ingot(X_train, y_train)
+        # evaluate(clf, X_test, y_test)
+        # folds = CVFolds()
+        # crossValidate(model, X_train, y_train, folds)
+        # saveObject(model, "ml/ingot.pkl")
 
 datafile, labelfile, methods = argCheck()
 model_run(datafile, labelfile, methods)
