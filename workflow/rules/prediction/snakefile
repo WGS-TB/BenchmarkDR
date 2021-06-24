@@ -1,9 +1,6 @@
 configfile: "config.yml"
 
-rule ml_run:
-    input:
-        data="data/gene_data.csv",
-        label="data/AllLabels.csv"
+rule build_model:
     params:
         methods=config["METHODS"]
     output:
@@ -12,17 +9,17 @@ rule ml_run:
     conda:
         "env.yml"
     shell:
-        "python scripts/ml_run.py -d {input.data} -l {input.label} {params.methods}"
+        "python scripts/build_model.py {params.methods}"
 
-# rule evaluate:
-#     input:
-#         data="data/gene_data.csv",
-#         label="data/AllLabels.csv",
-#         model="ml/{method}.pkl"
-#     output:
-#         expand("ml/{methods}.pkl",
-#             methods=config["METHODS"])
-#     conda:
-#         "env.yml"
-#     shell:
-#         "python scripts/ml_run.py -d {input.data} -l {input.label} {params.methods}"
+rule evaluation:
+    input:
+        data="data/gene_data.csv",
+        label="data/AllLabels.csv",
+        model="ml/{method}.pkl"
+    ## TODO params based on types of evaluation: acc, auc-roc, cross validation, etc
+    output:
+        "results/{method}.txt"
+    conda:
+        "env.yml"
+    shell:
+        "python scripts/evaluation.py -d {input.data} -l {input.label} -m {input.model}"

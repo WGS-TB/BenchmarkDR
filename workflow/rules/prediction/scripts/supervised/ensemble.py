@@ -1,44 +1,39 @@
-def dt(X_train, y_train):
+def dt():
     from sklearn.tree import DecisionTreeClassifier
-    print("Fitting DT...")
+    print("Building DT...")
 
     model = DecisionTreeClassifier()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
 
-def rf(X_train, y_train):
+def rf():
     from sklearn.ensemble import RandomForestClassifier
-    print("Fitting RF...")
+    print("Building RF...")
 
     model = RandomForestClassifier(n_estimators=140, min_samples_split=4, bootstrap=False, max_depth=50)
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
 
-def extratrees(X_train, y_train):
+def extratrees():
     from sklearn.ensemble import ExtraTreesClassifier
-    print("Fitting ExtraTrees...")
+    print("Building ExtraTrees...")
 
     model = ExtraTreesClassifier()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
 
-def adaboost(X_train, y_train):
+def adaboost():
     from sklearn.ensemble import AdaBoostClassifier
-    print("Fitting AdaBoost...")
+    print("Building AdaBoost...")
 
     model = AdaBoostClassifier()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
 
-def gbt(X_train, y_train):
+def gbt():
     from sklearn.ensemble import GradientBoostingClassifier
-    print("Fitting GBT...")
+    print("Building GBT...")
 
     model = GradientBoostingClassifier()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model

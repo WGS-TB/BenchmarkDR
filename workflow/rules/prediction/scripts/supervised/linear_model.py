@@ -1,29 +1,27 @@
-def lr(X_train, y_train):
+def lr():
     from sklearn.linear_model import LogisticRegression
-    print("Fitting LR...")
+    print("Building LR...")
 
     model = LogisticRegression(penalty='l2', solver='newton-cg')
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
 
-def lrcv(X_train, y_train):
+def lrcv():
     from sklearn.linear_model import LogisticRegressionCV
     
-    print("Fitting LR CV...")
+    print("Building LR CV...")
 
     cv = crossValidation()
 
     model = LogisticRegressionCV(cv=cv, penalty='l2', solver='newton-cg')
-    clf = model.fit(X_train, y_train)
+    clf = model.fit()
 
     return model, clf
 
-def sgd(X_train, y_train):
+def sgd():
     from sklearn.linear_model import SGDClassifier
-    print("Fitting SGD...")
+    print("Building SGD...")
 
     model = SGDClassifier()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model

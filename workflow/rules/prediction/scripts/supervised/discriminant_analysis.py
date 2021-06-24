@@ -1,17 +1,15 @@
-def lda(X_train, y_train):
+def lda():
     from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-    print("Fitting LDA...")
+    print("Building LDA...")
 
     model = LinearDiscriminantAnalysis()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
 
-def qda(X_train, y_train):
+def qda():
     from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
-    print("Fitting QDA...")
+    print("Building QDA...")
 
     model = QuadraticDiscriminantAnalysis()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model

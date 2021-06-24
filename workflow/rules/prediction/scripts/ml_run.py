@@ -2,25 +2,7 @@ import pandas as pd
 import numpy as np
 import sys, getopt
 from sklearn.model_selection import train_test_split
-
-def argCheck():
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "d:l:", ["dfile=", "lfile="])
-    except getopt.GetoptError as err:
-        print(err)
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt in ("-d", "--dfile"):
-            datafile = arg
-        elif opt in ("-l", "--lfile"):
-            labelfile = arg
-    methods = sys.argv[5:]
-    print("Data file = ", datafile)
-    print("Label file = ", labelfile)
-    print("Running these methods = ", methods)
-
-    return datafile, labelfile, methods
+from support import argCheck
 
 def model_run(datafile, labelfile, methods):
     from support import (preprocess, saveObject)

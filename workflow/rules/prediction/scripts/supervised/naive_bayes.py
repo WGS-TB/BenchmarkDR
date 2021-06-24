@@ -1,17 +1,15 @@
-def gnb(X_train, y_train):
+def gnb():
     from sklearn.naive_bayes import GaussianNB
-    print("Fitting GaussianNB...")
+    print("Building GaussianNB...")
 
     model = GaussianNB()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
 
-def cnb(X_train, y_train):
+def cnb():
     from sklearn.naive_bayes import ComplementNB
-    print("Fitting ComplementNB...")
+    print("Building ComplementNB...")
 
     model = ComplementNB()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model

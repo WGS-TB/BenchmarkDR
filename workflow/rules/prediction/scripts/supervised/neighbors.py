@@ -1,17 +1,15 @@
-def knn(X_train, y_train):
+def knn():
     from sklearn.neighbors import KNeighborsClassifier
-    print("Fitting KNN...")
+    print("Building KNN...")
 
     model = KNeighborsClassifier()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
 
-def ncc(X_train, y_train):
+def ncc():
     from sklearn.neighbors import NearestCentroid
-    print("Fitting NearestCentroid...")
+    print("Building NearestCentroid...")
 
     model = NearestCentroid()
-    clf = model.fit(X_train, y_train)
 
-    return model, clf
+    return model
