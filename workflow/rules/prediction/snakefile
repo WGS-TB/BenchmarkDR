@@ -11,6 +11,16 @@ rule build_model:
     shell:
         "python scripts/build_model.py {params.methods}"
 
+rule build_model2:
+    params:
+        methods=config["METHODS"]
+    output:
+        "ml/build_model2.txt"
+    conda:
+        "env.yml"
+    shell:
+        "python scripts/build_model2.py --config models_conf.yml --model-name {params.methods}"
+
 rule evaluation:
     input:
         data="data/gene_data.csv",

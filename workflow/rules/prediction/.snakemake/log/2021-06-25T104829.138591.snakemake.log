@@ -1,0 +1,52 @@
+Full Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/io.py", line 1605, in _load_configfile
+    return yaml.load(f, Loader=OrderedLoader)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/__init__.py", line 114, in load
+    return loader.get_single_data()
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/constructor.py", line 49, in get_single_data
+    node = self.get_single_node()
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 36, in get_single_node
+    document = self.compose_document()
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 55, in compose_document
+    node = self.compose_node(None, None)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 84, in compose_node
+    node = self.compose_mapping_node(anchor)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 133, in compose_mapping_node
+    item_value = self.compose_node(node, item_key)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 84, in compose_node
+    node = self.compose_mapping_node(anchor)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 133, in compose_mapping_node
+    item_value = self.compose_node(node, item_key)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 84, in compose_node
+    node = self.compose_mapping_node(anchor)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 133, in compose_mapping_node
+    item_value = self.compose_node(node, item_key)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 84, in compose_node
+    node = self.compose_mapping_node(anchor)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 133, in compose_mapping_node
+    item_value = self.compose_node(node, item_key)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/yaml/composer.py", line 68, in compose_node
+    raise ComposerError(None, None, "found undefined alias %r"
+yaml.composer.ComposerError: found undefined alias 'seed'
+  in "config.yml", line 10, column 21
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/__init__.py", line 591, in snakemake
+    workflow.include(
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/workflow.py", line 1169, in include
+    exec(compile(code, snakefile, "exec"), self.globals)
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 1, in <module>
+    configfile: "config.yml"
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/workflow.py", line 1226, in configfile
+    c = snakemake.io.load_configfile(fp)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/io.py", line 1618, in load_configfile
+    config = _load_configfile(configpath)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/io.py", line 1607, in _load_configfile
+    raise WorkflowError(
+snakemake.exceptions.WorkflowError: Config file is not valid JSON or YAML. In case of YAML, make sure to not mix whitespace and tab indentation.
+
+WorkflowError in line 1 of /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile:
+Config file is not valid JSON or YAML. In case of YAML, make sure to not mix whitespace and tab indentation.
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 1, in <module>
