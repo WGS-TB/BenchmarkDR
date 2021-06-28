@@ -16,7 +16,9 @@ def argCheck():
             modelfile = arg
     print("Data file = ", datafile)
     print("Label file = ", labelfile)
-    print("Running method = ", modelfile)
+    print("Running model = ", modelfile)
+    print("_______________________________")
+
 
     return datafile, labelfile, modelfile
 
@@ -37,6 +39,8 @@ def preprocess(data, label):
         
     print('label set: {0}'.format(labels.shape))
     print('data set: {0}'.format(data.shape))
+    print("_______________________________")
+
 
     return(data, labels)
 

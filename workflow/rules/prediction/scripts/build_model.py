@@ -78,12 +78,12 @@ def build_model(methods):
     #     # crossValidate(model, , folds)
     #     saveObject(model, "ml/ncc.pkl")
 
-    # from supervised.specials import ingot
-    # model = ingot()
-    # evaluate(clf, X_test, y_test)
-    # folds = CVFolds()
-    # crossValidate(model, , folds)
-    # saveObject(model, "ml/ingot.pkl")
+    from supervised.specials import ingot
+    model = ingot()
+    evaluate(clf, X_test, y_test)
+    folds = CVFolds()
+    crossValidate(model, , folds)
+    saveObject(model, "ml/ingot.pkl")
 
 methods = sys.argv[1:]
 print(methods)

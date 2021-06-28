@@ -1,2 +1,3 @@
-METHODS: ["LR_l1", "RF"]
+# METHODS: ["LR_l1", "RF"]
+METHODS: ["rf"]
 # METHODS: ["lr", "sgd", "dt", "rf", "et", "adb", "gbt", "gnb", "cnb", "svm", "knn", "ncc"]

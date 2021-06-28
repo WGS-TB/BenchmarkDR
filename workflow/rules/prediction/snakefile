@@ -15,7 +15,8 @@ rule build_model2:
     params:
         methods=config["METHODS"]
     output:
-        "ml/build_model2.txt"
+        expand("ml/{method}.joblib",
+            method=config["METHODS"])
     conda:
         "env.yml"
     shell:
@@ -25,7 +26,7 @@ rule evaluation:
     input:
         data="data/gene_data.csv",
         label="data/AllLabels.csv",
-        model="ml/{method}.pkl"
+        model="ml/{method}.joblib"
     ## TODO params based on types of evaluation: acc, auc-roc, cross validation, etc
     output:
         "results/{method}.txt"
