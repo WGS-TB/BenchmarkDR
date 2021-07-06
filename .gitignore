@@ -186,3 +186,4 @@ data/acinetobacter_baumannii/kmer/SRR11318038.1.res.kmc_pre
 data/acinetobacter_baumannii/kmer/SRR11318038.1.res.kmc_suf
 .snakemake/log/2021-05-30T135334.912705.snakemake.log
 .snakemake/log/2021-05-30T135352.207458.snakemake.log
+**/*.snakemake.log
