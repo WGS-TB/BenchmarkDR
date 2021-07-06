@@ -1,3 +1,21 @@
+TrainTestSplit:
+  random_state: &seed 33
+  test_size: 0.2
+
+SplitterClass:
+  module: sklearn.model_selection
+  splitter: StratifiedShuffleSplit
+  params:
+    n_splits: 5
+    random_state: 8
+
+CrossValidation:
+  cv: 5
+  refit: 'balanced_accuracy'
+  n_jobs: -1
+  return_train_score: True
+  verbose: 1
+
 Models:
   LR_l1:
     module: sklearn.linear_model
@@ -6,6 +24,8 @@ Models:
       penalty: 'l1'
       solver: 'liblinear'
       class_weight: 'balanced'
+    cv:
+      C: np.logspace(-4, 4, base=10, num=100)
 
   LR_l2:
     module: sklearn.linear_model
@@ -15,6 +35,8 @@ Models:
       n_jobs: -1
       solver: 'sag'
       class_weight: 'balanced'
+    cv:
+      C: [0.0001, 0.001, 0.01, 0.1, 1, 10.0, 100.0, 1000.0, 10000.0] # change into np logspace
 
   SVM_l1:
     module: sklearn.svm
@@ -24,6 +46,9 @@ Models:
       dual: False
       max_iter: 2000
       class_weight: 'balanced'
+    cv:
+      loss: ['squared_hinge']
+      C: [0.01, 0.1, 1, 10.0, 100.0]
 
   SVM_l2:
     module: sklearn.svm
@@ -32,6 +57,9 @@ Models:
       penalty: 'l2'
       max_iter: 2000
       class_weight: 'balanced'
+    cv:
+      loss: ['squared_hinge','hinge']
+      C: [0.01, 0.1, 1, 10.0, 100.0]
 
   RF:
     module: sklearn.ensemble
@@ -39,5 +67,50 @@ Models:
     params:
       n_jobs: -1
       class_weight: 'balanced'
+    cv:
+      n_estimators: [100, 300, 500, 1000]
+      max_depth: [5, 10, 15, 30]
+      min_samples_split: [2, 5, 10, 15, 100]
+      min_samples_leaf: [1, 2, 5, 10]
 
+  DT:
+    module: sklearn.ensemble
+    model: DecisionTreeClassifier
   
+  ET:
+    module: sklearn.ensemble
+    model: ExtraTreesClassifier
+
+  ADB:
+    module: sklearn.ensemble
+    model: AdaBoostClassifier
+
+  GBT:
+    module: sklearn.ensemble
+    model: GradientBoostingClassifier
+
+  SGD:
+    module: sklearn.linear_model
+    model: SGDClassifier
+
+  KNN:
+    module: sklearn.neighbors
+    model: KNeighborsClassifier
+
+  NCC:
+    module: sklearn.neighbors
+    model: NearestCentroid
+
+  GNB:
+    module: sklearn.naive_bayes
+    model: GaussianNB
+  
+  CNB:
+    module: sklearn.naive_bayes
+    model: ComplementNB
+
+
+ModelRegressors:
+  ADB:
+    module: sklearn.ensemble
+    model: AdaBoostRegressor

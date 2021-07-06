@@ -1,15 +1,16 @@
 configfile: "config.yml"
 
-rule build_model:
-    params:
-        methods=config["METHODS"]
-    output:
-        expand("ml/{method}.pkl",
-            method=config["METHODS"])
-    conda:
-        "env.yml"
-    shell:
-        "python scripts/build_model.py {params.methods}"
+# old method...
+# rule build_model:
+#     params:
+#         methods=config["METHODS"]
+#     output:
+#         expand("ml/{method}.pkl",
+#             method=config["METHODS"])
+#     conda:
+#         "env.yml"
+#     shell:
+#         "python scripts/build_model.py {params.methods}"
 
 rule build_model2:
     params:
@@ -27,10 +28,12 @@ rule evaluation:
         data="data/gene_data.csv",
         label="data/AllLabels.csv",
         model="ml/{method}.joblib"
-    ## TODO params based on types of evaluation: acc, auc-roc, cross validation, etc
+    params:
+        methods=config["METHODS"],
+        cv=config["OPTIMIZATION"]
     output:
-        "results/{method}.txt"
+        "results/{method}.csv"
     conda:
         "env.yml"
     shell:
-        "python scripts/evaluation.py -d {input.data} -l {input.label} -m {input.model}"
+        "python scripts/evaluation.py --data {input.data} --label {input.label} --config models_conf.yml --model {input.model} --model-name {wildcards.method} --optimize {params.cv}"

@@ -1,0 +1,12 @@
+Full Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/__init__.py", line 591, in snakemake
+    workflow.include(
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/workflow.py", line 1169, in include
+    exec(compile(code, snakefile, "exec"), self.globals)
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 32
+    cv = config [ "OPTIMIZATION" ]
+    ^
+SyntaxError: invalid syntax
+
+SyntaxError in line 17 of /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile:
+invalid syntax
