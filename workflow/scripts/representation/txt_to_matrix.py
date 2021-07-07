@@ -18,8 +18,9 @@ for file in file_list:
     strain_data.index = [strain_id]
 
     matrix_df = matrix_df.append(strain_data)
+    print(file)
 
 matrix_df.fillna(value=0, inplace=True)
 matrix_df.reset_index(inplace=True)
 
-matrix_df.to_csv(output_file)
+matrix_df.to_csv(output_file, index=False)
