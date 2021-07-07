@@ -20,4 +20,4 @@ for file in file_list:
 
 matrix_df.fillna(value=0, inplace=True)
 
-matrix_df.to_csv(output_file)
+matrix_df.to_csv(output_file, index=False)
