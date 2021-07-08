@@ -1,0 +1,94 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job            count    min threads    max threads
+-----------  -------  -------------  -------------
+build_model        1              1              1
+evaluation         1              1              1
+total              2              1              1
+
+Resources before job selection: {'_cores': 1, '_nodes': 9223372036854775807}
+Ready jobs (1):
+	build_model
+Select jobs to execute...
+Selected jobs (1):
+	build_model
+Resources after job selection: {'_cores': 0, '_nodes': 9223372036854775806}
+
+[Thu Jul  8 15:48:19 2021]
+rule build_model:
+    output: ml/LR_l1.joblib
+    jobid: 1
+    resources: tmpdir=/tmp
+
+[Thu Jul  8 15:48:20 2021]
+Finished job 1.
+1 of 2 steps (50%) done
+Resources before job selection: {'_cores': 1, '_nodes': 9223372036854775807}
+Ready jobs (1):
+	evaluation
+Select jobs to execute...
+Selected jobs (1):
+	evaluation
+Resources after job selection: {'_cores': 0, '_nodes': 9223372036854775806}
+
+[Thu Jul  8 15:48:20 2021]
+rule evaluation:
+    input: ../../../data/gene_data/gene_data.csv, ../../../data/gene_data/AllLabels.csv, ml/LR_l1.joblib
+    output: results/summary.csv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+Full Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/jobs.py", line 417, in shellcmd
+    self.format_wildcards(self.rule.shellcmd)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/jobs.py", line 856, in format_wildcards
+    return format(string, **_variables)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/utils.py", line 427, in format
+    return fmt.format(_pattern, *args, **variables)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/string.py", line 163, in format
+    return self.vformat(format_string, args, kwargs)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/string.py", line 167, in vformat
+    result, _ = self._vformat(format_string, args, kwargs, used_args, 2)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/string.py", line 207, in _vformat
+    obj, arg_used = self.get_field(field_name, args, kwargs)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/string.py", line 278, in get_field
+    obj = getattr(obj, i)
+AttributeError: 'Wildcards' object has no attribute 'method'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/__init__.py", line 696, in snakemake
+    success = workflow.execute(
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/workflow.py", line 1054, in execute
+    success = scheduler.schedule()
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/scheduler.py", line 501, in schedule
+    self.run(runjobs)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/scheduler.py", line 518, in run
+    executor.run_jobs(
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 149, in run_jobs
+    self.run(
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 463, in run
+    super()._run(job)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 243, in _run
+    super()._run(job)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 169, in _run
+    self.printjob(job)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 175, in printjob
+    job.log_info(skip_dynamic=True)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/jobs.py", line 937, in log_info
+    logger.shellcmd(self.shellcmd, indent=indent)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/jobs.py", line 422, in shellcmd
+    raise RuleException(str(ex), rule=self.rule)
+snakemake.exceptions.RuleException: 'Wildcards' object has no attribute 'method'
+
+RuleException in line 14 of /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile:
+'Wildcards' object has no attribute 'method'
+unlocking
+removing lock
+removing lock
+removed all locks

@@ -1,4 +1,4 @@
-PATH_DATA:
+PATH: ""
 
 BACTERIA:
 
@@ -6,14 +6,10 @@ REPRESENTATION:
 
 LABEL_TYPE:
 
-METHODS:
+METHODS: ["LR_l1"]
 
 OPTIMIZATION:
 
 # LABEL: Susceptibility # 'Susceptibility' or 'MIC'
-
-# METHODS: ["LR_l1"]
-# # METHODS: ["rf"]
-# # METHODS: ["lr", "sgd", "dt", "rf", "et", "adb", "gbt", "gnb", "cnb", "svm", "knn", "ncc"]
 
 # OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"

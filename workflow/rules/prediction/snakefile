@@ -1,4 +1,4 @@
-configfile: "config.yml"
+configfile: "../../../config.yaml"
 
 rule build_model:
     params:
@@ -7,21 +7,22 @@ rule build_model:
         expand("ml/{method}.joblib",
             method=config["METHODS"])
     conda:
-        "env.yml"
+        "../../envs/prediction/env.yml"
     shell:
-        "python scripts/build_model.py --config models_conf.yml --model-name {params.methods}"
+        "python ../../scripts/prediction/build_model.py --config models_conf.yml --model-name {params.methods}"
 
 rule evaluation:
     input:
-        data="data/gene_data.csv",
-        label="data/AllLabels.csv",
-        model="ml/{method}.joblib"
+        data="../../../data/gene_data/gene_data.csv",
+        label="../../../data/gene_data/AllLabels.csv",
+        model=expand("ml/{method}.joblib",
+            method=config["METHODS"])
     params:
         methods=config["METHODS"],
         cv=config["OPTIMIZATION"]
     output:
-        "results/{method}.csv"
+        "results/summary.csv"
     conda:
-        "env.yml"
+        "../../envs/prediction/env.yml"
     shell:
-        "python scripts/evaluation.py --data {input.data} --label {input.label} --config models_conf.yml --model {input.model} --model-name {wildcards.method} --optimize {params.cv}"
+        "python ../../scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config models_conf.yml --model {input.model} --model-name {wildcards.method} --optimize {params.cv}"
