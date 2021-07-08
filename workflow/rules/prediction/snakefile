@@ -18,11 +18,10 @@ rule evaluation:
         model=expand("ml/{method}.joblib",
             method=config["METHODS"])
     params:
-        methods=config["METHODS"],
         cv=config["OPTIMIZATION"]
     output:
         "results/summary.csv"
     conda:
         "../../envs/prediction/env.yml"
     shell:
-        "python ../../scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config models_conf.yml --model {input.model} --model-name {wildcards.method} --optimize {params.cv}"
+        "python ../../scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config models_conf.yml --model {input.model} --optimize {params.cv}"

@@ -8,8 +8,7 @@ LABEL_TYPE:
 
 METHODS: ["LR_l1"]
 
-OPTIMIZATION:
+OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
 
 # LABEL: Susceptibility # 'Susceptibility' or 'MIC'
 
-# OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"

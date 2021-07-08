@@ -4,6 +4,7 @@ import numpy as np
 import time
 import pandas as pd
 import utils
+import os
 
 def evaluate(clf, X_test, y_test):
     accuracy = clf.score(X_test, y_test)
@@ -50,10 +51,6 @@ def main():
         help='Path to the model file', required=True
         )
     parser.add_argument(
-        '--model-name', dest='modelname', nargs='+',
-        help='Name of model', required=True
-        )
-    parser.add_argument(
         '--optimize', dest='optimization',
         help='Name of optimization method', required=True,
     )
@@ -77,6 +74,7 @@ def main():
     for modelfile in modelfiles:
         print("Loading ", modelfile)
         model = load(modelfile)
+        modelname = modelfile.replace("ml/", "").replace(".joblib", "")
 
         results=[]
 
@@ -106,7 +104,7 @@ def main():
 
             if args.optimization != "None" :
                 print('Hyper-parameter Tuning')
-                param_grid = config_file['Models'][args.modelname[0]]['cv']
+                param_grid = config_file['Models'][modelname]['cv']
                 for key, value in param_grid.items():
                     if isinstance(value, str):
                         param_grid[key] = eval(param_grid[key])
@@ -122,45 +120,44 @@ def main():
                     grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
                                 scoring=scoring, **config_file['CrossValidation'])
 
-                # start_time = time.time()
                 grid.fit(X_train, y_train)
-                # end_time = time.time()
                 print('Best params: {}'.format(grid.best_params_))
-                model = grid.best_estimator_
+                cv_results = pd.DataFrame([grid.cv_results_])
+                filename = os.path.join(results, modelname + "_" + drug + ".csv")
+                print('Saving results to {0}'.format(filename))
+                cv_results.to_csv(filename)
+
                 print("_______________________________")
 
             elif args.optimization == "None" :
                 print('Not running hyper-parameter tuning')
+                print('Fitting training data')
+                print(model)
+                start_time = time.time()
+                clf = model.fit(X_train, y_train)
+                end_time = time.time()
                 print("_______________________________")
 
-            print('Fitting training data')
-            print(model)
-            start_time = time.time()
-            clf = model.fit(X_train, y_train)
-            end_time = time.time()
-            print("_______________________________")
+                print('Evaluating')
+                evaluate(clf, X_test, y_test)
+                folds = CVFolds(config_file)
+                crossValidate(model, X_train, y_train, folds)
+                
+                y_pred = clf.predict(X_test)
+                tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+                balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
+                sensitivity = tp/(tp + fn)
+                specificity = tn/(tn + fp)
 
-            print('Evaluating')
-            evaluate(clf, X_test, y_test)
-            folds = CVFolds(config_file)
-            crossValidate(model, X_train, y_train, folds)
+                result = dict(Drug = drug, Time= round(end_time - start_time, 2),
+                    Balanced_accuracy=balanced_accuracy, tp=tp, tn=tn, fp=fp, fn=fn,
+                    sensitivity = sensitivity, specificity = specificity, Model=model)
+                results.append(result)
+                print(result)
+                print("_______________________________")
             
-            y_pred = clf.predict(X_test)
-            tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-            balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
-            sensitivity = tp/(tp + fn)
-            specificity = tn/(tn + fp)
-
-            result = dict(Drug = drug, Time= round(end_time - start_time, 2),
-                Balanced_accuracy=balanced_accuracy, tp=tp, tn=tn, fp=fp, fn=fn,
-                sensitivity = sensitivity, specificity = specificity, Model=model)
-            results.append(result)
-            print(result)
-            print("_______________________________")
-
         print(results)
-        filename = modelfile.replace('ml', 'results')
-        filename = filename.replace('joblib', 'csv')
+        filename = modelfile.replace('ml', 'results').replace('joblib', 'csv')
         print('Saving results to {0}'.format(filename))
 
         pd.DataFrame([results]).to_csv(filename)
