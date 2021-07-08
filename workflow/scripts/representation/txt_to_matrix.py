@@ -23,4 +23,4 @@ for file in file_list:
 matrix_df.fillna(value=0, inplace=True)
 matrix_df.reset_index(inplace=True)
 
-matrix_df.to_csv(output_file, index=False)
+matrix_df.to_csv(output_file)

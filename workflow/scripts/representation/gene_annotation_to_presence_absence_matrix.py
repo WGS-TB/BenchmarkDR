@@ -45,4 +45,4 @@ for file in file_list:
 
 df_matrix.fillna(value = 0, inplace = True)    
 
-df_matrix.to_csv(output_file, index=False)
+df_matrix.to_csv(output_file)
