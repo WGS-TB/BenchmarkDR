@@ -122,8 +122,8 @@ def main():
 
                 grid.fit(X_train, y_train)
                 print('Best params: {}'.format(grid.best_params_))
-                cv_results = pd.DataFrame([grid.cv_results_])
-                filename = os.path.join(results, modelname + "_" + drug + ".csv")
+                cv_results = pd.DataFrame(grid.cv_results_)
+                filename = os.path.join("results", modelname + "_" + drug + ".csv")
                 print('Saving results to {0}'.format(filename))
                 cv_results.to_csv(filename)
 
