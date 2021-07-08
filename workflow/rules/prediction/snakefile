@@ -14,7 +14,7 @@ rule build_model:
 rule evaluation:
     input:
         data="../../../data/gene_data/gene_data.csv",
-        label="../../../data/gene_data/AllLabels.csv",
+        label="../../../data/gene_data/AllLabels_fast.csv",
         model=expand("ml/{method}.joblib",
             method=config["METHODS"])
     params:

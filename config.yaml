@@ -4,11 +4,8 @@ BACTERIA:
 
 REPRESENTATION:
 
-LABEL_TYPE:
+# LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
 
-METHODS: ["LR_l1"]
+METHODS: ["LR_l1", "SVM_l1"]
 
-OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
-
-# LABEL: Susceptibility # 'Susceptibility' or 'MIC'
-
+OPTIMIZATION: GridSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"

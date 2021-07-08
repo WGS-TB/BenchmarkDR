@@ -71,12 +71,13 @@ def main():
                    fp=make_scorer(utils.fp), fn=make_scorer(utils.fn),
                    balanced_accuracy=make_scorer(balanced_accuracy_score))
 
+    
+
     for modelfile in modelfiles:
         print("Loading ", modelfile)
         model = load(modelfile)
         modelname = modelfile.replace("ml/", "").replace(".joblib", "")
-
-        results=[]
+        results=pd.DataFrame()
 
         for drug in labels.columns:
             print('Analysing {0}'.format(drug))
@@ -122,12 +123,15 @@ def main():
 
                 grid.fit(X_train, y_train)
                 print('Best params: {}'.format(grid.best_params_))
-                cv_results = pd.DataFrame(grid.cv_results_)
-                filename = os.path.join("results", modelname + "_" + drug + ".csv")
-                print('Saving results to {0}'.format(filename))
-                cv_results.to_csv(filename)
 
+                filename = os.path.join("results", modelname + "_" + drug + ".csv")
+                print('Saving cv results to {0}'.format(filename))
+                cv_results = pd.DataFrame(grid.cv_results_)
+                cv_results.to_csv(filename)
                 print("_______________________________")
+
+                result = cv_results.iloc[[grid.best_index_]]
+                result.insert(0, "Drug", drug)
 
             elif args.optimization == "None" :
                 print('Not running hyper-parameter tuning')
@@ -152,17 +156,15 @@ def main():
                 result = dict(Drug = drug, Time= round(end_time - start_time, 2),
                     Balanced_accuracy=balanced_accuracy, tp=tp, tn=tn, fp=fp, fn=fn,
                     sensitivity = sensitivity, specificity = specificity, Model=model)
-                results.append(result)
-                print(result)
-                print("_______________________________")
+                result = pd.DataFrame([result])
+                
+            results = results.append(result)
+            print("_______________________________")
             
         print(results)
         filename = modelfile.replace('ml', 'results').replace('joblib', 'csv')
         print('Saving results to {0}'.format(filename))
-
-        pd.DataFrame([results]).to_csv(filename)
-        
-        break
+        results.to_csv(filename)
             
 
 main()
