@@ -1,0 +1,39 @@
+configfile: "config.yml"
+
+# old method...
+# rule build_model:
+#     params:
+#         methods=config["METHODS"]
+#     output:
+#         expand("ml/{method}.pkl",
+#             method=config["METHODS"])
+#     conda:
+#         "env.yml"
+#     shell:
+#         "python scripts/build_model.py {params.methods}"
+
+rule build_model2:
+    params:
+        methods=config["METHODS"]
+    output:
+        expand("ml/{method}.joblib",
+            method=config["METHODS"])
+    conda:
+        "env.yml"
+    shell:
+        "python scripts/build_model2.py --config models_conf.yml --model-name {params.methods}"
+
+rule evaluation:
+    input:
+        data="data/gene_data.csv",
+        label="data/AllLabels.csv",
+        model="ml/{method}.joblib"
+    params:
+        methods=config["METHODS"],
+        cv=config["OPTIMIZATION"]
+    output:
+        "results/{method}.csv"
+    conda:
+        "env.yml"
+    shell:
+        "python scripts/evaluation.py --data {input.data} --label {input.label} --config models_conf.yml --model {input.model} --model-name {wildcards.method} --optimize {params.cv}"
