@@ -1,18 +1,6 @@
 configfile: "config.yml"
 
-# old method...
-# rule build_model:
-#     params:
-#         methods=config["METHODS"]
-#     output:
-#         expand("ml/{method}.pkl",
-#             method=config["METHODS"])
-#     conda:
-#         "env.yml"
-#     shell:
-#         "python scripts/build_model.py {params.methods}"
-
-rule build_model2:
+rule build_model:
     params:
         methods=config["METHODS"]
     output:
@@ -21,7 +9,7 @@ rule build_model2:
     conda:
         "env.yml"
     shell:
-        "python scripts/build_model2.py --config models_conf.yml --model-name {params.methods}"
+        "python scripts/build_model.py --config models_conf.yml --model-name {params.methods}"
 
 rule evaluation:
     input:
