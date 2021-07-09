@@ -109,7 +109,6 @@ Models:
     module: sklearn.naive_bayes
     model: ComplementNB
 
-
 ModelRegressors:
   ADB:
     module: sklearn.ensemble

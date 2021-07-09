@@ -1,5 +1,8 @@
 configfile: "config.yaml"
 
+path_to_data = "data/gene_data/"
+output_dir = path_to_data
+
 rule build_model:
     input:
         conf="workflow/rules/prediction/models_conf.yml"
@@ -9,14 +12,14 @@ rule build_model:
         expand("workflow/output/prediction/{method}.joblib",
             method=config["METHODS"])
     conda:
-        "workflow/envs/prediction/env.yml"
+        "../../envs/prediction/env.yml"
     shell:
         "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {params.methods}"
 
 rule evaluation:
     input:
-        data="data/gene_data/gene_data.csv",
-        label="data/gene_data/AllLabels_fast.csv",
+        data=str(path_to_data + "gene_data.csv"),
+        label=str(path_to_data + "AllLabels_fast.csv"),
         model=expand("workflow/output/prediction/{method}.joblib",
             method=config["METHODS"]),
         conf="workflow/rules/prediction/models_conf.yml"
@@ -25,6 +28,6 @@ rule evaluation:
     output:
         "results/summary.csv"
     conda:
-        "workflow/envs/prediction/env.yml"
+        "../../envs/prediction/env.yml"
     shell:
         "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {input.model} --optimize {params.cv}"
