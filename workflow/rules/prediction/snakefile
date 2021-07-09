@@ -1,27 +1,30 @@
-configfile: "../../../config.yaml"
+configfile: "config.yaml"
 
 rule build_model:
+    input:
+        conf="workflow/rules/prediction/models_conf.yml"
     params:
         methods=config["METHODS"]
     output:
-        expand("ml/{method}.joblib",
+        expand("workflow/output/prediction/{method}.joblib",
             method=config["METHODS"])
     conda:
-        "../../envs/prediction/env.yml"
+        "workflow/envs/prediction/env.yml"
     shell:
-        "python ../../scripts/prediction/build_model.py --config models_conf.yml --model-name {params.methods}"
+        "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {params.methods}"
 
 rule evaluation:
     input:
-        data="../../../data/gene_data/gene_data.csv",
-        label="../../../data/gene_data/AllLabels_fast.csv",
-        model=expand("ml/{method}.joblib",
-            method=config["METHODS"])
+        data="data/gene_data/gene_data.csv",
+        label="data/gene_data/AllLabels_fast.csv",
+        model=expand("workflow/output/prediction/{method}.joblib",
+            method=config["METHODS"]),
+        conf="workflow/rules/prediction/models_conf.yml"
     params:
         cv=config["OPTIMIZATION"]
     output:
         "results/summary.csv"
     conda:
-        "../../envs/prediction/env.yml"
+        "workflow/envs/prediction/env.yml"
     shell:
-        "python ../../scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config models_conf.yml --model {input.model} --optimize {params.cv}"
+        "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {input.model} --optimize {params.cv}"

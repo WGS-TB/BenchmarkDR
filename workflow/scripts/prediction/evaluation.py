@@ -76,7 +76,7 @@ def main():
     for modelfile in modelfiles:
         print("Loading ", modelfile)
         model = load(modelfile)
-        modelname = modelfile.replace("ml/", "").replace(".joblib", "")
+        modelname = modelfile.replace("workflow/output/prediction/", "").replace(".joblib", "")
         results=pd.DataFrame()
 
         for drug in labels.columns:

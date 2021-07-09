@@ -32,7 +32,7 @@ def main(sysargs=sys.argv[1:]):
         dClassifier = dClassifier(**config_file['Models'][model]['params'])
 
         print(dClassifier)
-        filename = os.path.join("ml", model + ".joblib")
+        filename = os.path.join("workflow/output/prediction/", model + ".joblib")
         dump(dClassifier, filename)
 
 main()
