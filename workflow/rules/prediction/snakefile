@@ -6,28 +6,31 @@ output_dir = path_to_data
 rule build_model:
     input:
         conf="workflow/rules/prediction/models_conf.yml"
-    params:
-        methods=config["METHODS"]
     output:
-        expand("workflow/output/prediction/{method}.joblib",
-            method=config["METHODS"])
+        "workflow/output/prediction/{method}.joblib"
     conda:
         "../../envs/prediction/env.yml"
     shell:
-        "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {params.methods}"
+        "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {wildcards.method}"
 
 rule evaluation:
     input:
         data=str(path_to_data + "gene_data.csv"),
         label=str(path_to_data + "AllLabels_fast.csv"),
-        model=expand("workflow/output/prediction/{method}.joblib",
-            method=config["METHODS"]),
+        model="workflow/output/prediction/{method}.joblib",
         conf="workflow/rules/prediction/models_conf.yml"
     params:
         cv=config["OPTIMIZATION"]
     output:
-        "results/summary.csv"
+        "results/{method}.csv"
     conda:
         "../../envs/prediction/env.yml"
     shell:
         "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {input.model} --optimize {params.cv}"
+
+rule aggregate_summary:
+    input:
+        expand("results/{method}.csv",
+            method=config["METHODS"])
+    output:
+        "results/summary.csv"

@@ -8,6 +8,6 @@ REPRESENTATION:
 
 # LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
 
-METHODS: ["LR_l1", "SVM_l1"]
+METHODS: ["LR_l1", "LR_l2", "SVM_l1"]
 
 OPTIMIZATION: GridSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
