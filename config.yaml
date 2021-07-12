@@ -2,13 +2,14 @@ PATH_DATA: "/rds/general/user/ns1920/projects/bacterial_datasets/live/pipeline_d
 
 BACTERIA: ["test_bacterium", "s_pyogenes"]
 
+OUTPUT_DIR: ""
+
 REPRESENTATION: ["snps"] # 'snps', 'gene_presence_absence'
-
-LABEL_TYPE: ["tbd"]
-
-METHODS: ["LR_l1"]
 
 OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
 
-# LABEL: Susceptibility # 'Susceptibility' or 'MIC'
+# LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
 
+METHODS: ["LR_l1", "LR_l2", "SVM_l1"]
+
+OPTIMIZATION: GridSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"

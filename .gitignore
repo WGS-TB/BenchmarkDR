@@ -186,3 +186,5 @@ data/acinetobacter_baumannii/kmer/SRR11318038.1.res.kmc_pre
 data/acinetobacter_baumannii/kmer/SRR11318038.1.res.kmc_suf
 workflow/rules/representation/.snakemake
 .vscode/settings.json
+*.log
+.snakemake

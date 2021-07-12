@@ -47,7 +47,7 @@ def main():
         help='Path to the config file', required=True,
     )
     parser.add_argument(
-        '--model', dest='modelfile', nargs='+',
+        '--model', dest='modelfile',
         help='Path to the model file', required=True
         )
     parser.add_argument(
@@ -64,105 +64,102 @@ def main():
     print("_______________________________")
 
     data, labels = preprocess(data = args.datafile, label = args.labelfile)
-    modelfiles = args.modelfile
+    modelfile = args.modelfile
     config_file = utils.config_reader(args.config)
 
     scoring = dict(Accuracy='accuracy', tp=make_scorer(utils.tp), tn=make_scorer(utils.tn),
                    fp=make_scorer(utils.fp), fn=make_scorer(utils.fn),
                    balanced_accuracy=make_scorer(balanced_accuracy_score))
 
-    for modelfile in modelfiles:
-        print("Loading ", modelfile)
-        model = load(modelfile)
-        modelname = modelfile.replace("ml/", "").replace(".joblib", "")
+    
+    print("Loading ", modelfile)
+    model = load(modelfile)
+    modelname = modelfile.replace("workflow/output/prediction/", "").replace(".joblib", "")
+    results=pd.DataFrame()
 
-        results=[]
+    for drug in labels.columns:
+        print('Analysing {0}'.format(drug))
 
-        for drug in labels.columns:
-            print('Analysing {0}'.format(drug))
+        y = np.ravel(labels[[drug]])
+        na_index = np.isnan(y)
+        y = y[~na_index]
 
-            y = np.ravel(labels[[drug]])
-            na_index = np.isnan(y)
-            y = y[~na_index]
+        X = data
+        X = X.loc[~na_index,:]
+        # X = np.sign(X)
 
-            X = data
-            X = X.loc[~na_index,:]
-            # X = np.sign(X)
+        print('Data shape: {}'.format(X.shape))
+        print('Label shape: {}'.format(y.shape))
+        print("_______________________________")
 
-            print('Data shape: {}'.format(X.shape))
-            print('Label shape: {}'.format(y.shape))
+
+        print('Train-Test split')
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42, shuffle=True)
+        print('Train data shape: {}'.format(X_train.shape))
+        print('Train label shape: {}'.format(y_train.shape))
+        print('Test data shape: {}'.format(X_test.shape))
+        print('Test label shape: {}'.format(y_test.shape))
+        print("_______________________________")
+
+        if args.optimization != "None" :
+            print('Hyper-parameter Tuning')
+            param_grid = config_file['Models'][modelname]['cv']
+            for key, value in param_grid.items():
+                if isinstance(value, str):
+                    param_grid[key] = eval(param_grid[key])
+            param_grid = {ele: (list(param_grid[ele])) for ele in param_grid}
+            print(param_grid)
+            for i in config_file['CrossValidation'].items(): print('{}: {}'.format(i[0], i[1]))
+
+            if args.optimization == "GridSearchCV":
+                grid = GridSearchCV(estimator=model, param_grid=param_grid,
+                            scoring=scoring, **config_file['CrossValidation'])
+
+            elif args.optimization == "RandomizedSearchCV":
+                grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
+                            scoring=scoring, **config_file['CrossValidation'])
+
+            grid.fit(X_train, y_train)
+            print('Best params: {}'.format(grid.best_params_))
+
+            filename = os.path.join("results", modelname + "_" + drug + ".csv")
+            print('Saving cv results to {0}'.format(filename))
+            cv_results = pd.DataFrame(grid.cv_results_)
+            cv_results.to_csv(filename)
             print("_______________________________")
 
+            result = cv_results.iloc[[grid.best_index_]]
+            result.insert(0, "Drug", drug)
 
-            print('Train-Test split')
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42, shuffle=True)
-            print('Train data shape: {}'.format(X_train.shape))
-            print('Train label shape: {}'.format(y_train.shape))
-            print('Test data shape: {}'.format(X_test.shape))
-            print('Test label shape: {}'.format(y_test.shape))
+        elif args.optimization == "None" :
+            print('Not running hyper-parameter tuning')
+            print('Fitting training data')
+            print(model)
+            start_time = time.time()
+            clf = model.fit(X_train, y_train)
+            end_time = time.time()
             print("_______________________________")
 
-            if args.optimization != "None" :
-                print('Hyper-parameter Tuning')
-                param_grid = config_file['Models'][modelname]['cv']
-                for key, value in param_grid.items():
-                    if isinstance(value, str):
-                        param_grid[key] = eval(param_grid[key])
-                param_grid = {ele: (list(param_grid[ele])) for ele in param_grid}
-                print(param_grid)
-                for i in config_file['CrossValidation'].items(): print('{}: {}'.format(i[0], i[1]))
-
-                if args.optimization == "GridSearchCV":
-                    grid = GridSearchCV(estimator=model, param_grid=param_grid,
-                                scoring=scoring, **config_file['CrossValidation'])
-
-                elif args.optimization == "RandomizedSearchCV":
-                    grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
-                                scoring=scoring, **config_file['CrossValidation'])
-
-                grid.fit(X_train, y_train)
-                print('Best params: {}'.format(grid.best_params_))
-                cv_results = pd.DataFrame(grid.cv_results_)
-                filename = os.path.join("results", modelname + "_" + drug + ".csv")
-                print('Saving results to {0}'.format(filename))
-                cv_results.to_csv(filename)
-
-                print("_______________________________")
-
-            elif args.optimization == "None" :
-                print('Not running hyper-parameter tuning')
-                print('Fitting training data')
-                print(model)
-                start_time = time.time()
-                clf = model.fit(X_train, y_train)
-                end_time = time.time()
-                print("_______________________________")
-
-                print('Evaluating')
-                evaluate(clf, X_test, y_test)
-                folds = CVFolds(config_file)
-                crossValidate(model, X_train, y_train, folds)
-                
-                y_pred = clf.predict(X_test)
-                tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-                balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
-                sensitivity = tp/(tp + fn)
-                specificity = tn/(tn + fp)
-
-                result = dict(Drug = drug, Time= round(end_time - start_time, 2),
-                    Balanced_accuracy=balanced_accuracy, tp=tp, tn=tn, fp=fp, fn=fn,
-                    sensitivity = sensitivity, specificity = specificity, Model=model)
-                results.append(result)
-                print(result)
-                print("_______________________________")
+            print('Evaluating')
+            evaluate(clf, X_test, y_test)
+            folds = CVFolds(config_file)
+            crossValidate(model, X_train, y_train, folds)
             
-        print(results)
-        filename = modelfile.replace('ml', 'results').replace('joblib', 'csv')
-        print('Saving results to {0}'.format(filename))
+            y_pred = clf.predict(X_test)
+            tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+            balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
+            sensitivity = tp/(tp + fn)
+            specificity = tn/(tn + fp)
 
-        pd.DataFrame([results]).to_csv(filename)
-        
-        break
+            result = dict(Drug = drug, Time= round(end_time - start_time, 2),
+                Balanced_accuracy=balanced_accuracy, tp=tp, tn=tn, fp=fp, fn=fn,
+                sensitivity = sensitivity, specificity = specificity, Model=model)
+            result = pd.DataFrame([result])
             
+        results = results.append(result)
 
+    filename = os.path.join("results", modelname + ".csv")
+    print('Saving results to {0}'.format(filename))
+    results.to_csv(filename)
+            
 main()

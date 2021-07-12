@@ -1,0 +1,77 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Conda environments: ignored
+Job stats:
+job           count    min threads    max threads
+----------  -------  -------------  -------------
+evaluation        1              1              1
+total             1              1              1
+
+Resources before job selection: {'_cores': 1, '_nodes': 9223372036854775807}
+Ready jobs (1):
+	evaluation
+Select jobs to execute...
+Selected jobs (1):
+	evaluation
+Resources after job selection: {'_cores': 0, '_nodes': 9223372036854775806}
+
+[Thu Jul  8 17:03:21 2021]
+rule evaluation:
+    input: ../../../data/gene_data/gene_data.csv, ../../../data/gene_data/AllLabels_fast.csv, ml/LR_l1.joblib
+    output: results/summary.csv
+    jobid: 0
+    resources: tmpdir=/tmp
+
+Full Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2372, in run_wrapper
+    run(
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 54, in __rule_evaluation
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/shell.py", line 263, in __new__
+    raise sp.CalledProcessError(retcode, cmd)
+subprocess.CalledProcessError: Command 'python ../../scripts/prediction/evaluation.py --data ../../../data/gene_data/gene_data.csv --label ../../../data/gene_data/AllLabels_fast.csv --config models_conf.yml --model ml/LR_l1.joblib --optimize GridSearchCV' returned non-zero exit status 1.
+
+[Thu Jul  8 17:03:30 2021]
+Error in rule evaluation:
+    jobid: 0
+    output: results/summary.csv
+    shell:
+        python ../../scripts/prediction/evaluation.py --data ../../../data/gene_data/gene_data.csv --label ../../../data/gene_data/AllLabels_fast.csv --config models_conf.yml --model ml/LR_l1.joblib --optimize GridSearchCV
+        (one of the commands exited with non-zero exit code; note that snakemake uses bash strict mode!)
+
+Full Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2372, in run_wrapper
+    run(
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 54, in __rule_evaluation
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/shell.py", line 263, in __new__
+    raise sp.CalledProcessError(retcode, cmd)
+subprocess.CalledProcessError: Command 'python ../../scripts/prediction/evaluation.py --data ../../../data/gene_data/gene_data.csv --label ../../../data/gene_data/AllLabels_fast.csv --config models_conf.yml --model ml/LR_l1.joblib --optimize GridSearchCV' returned non-zero exit status 1.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 592, in _callback
+    raise ex
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/concurrent/futures/thread.py", line 57, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 578, in cached_or_run
+    run_func(*args)
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/site-packages/snakemake/executors/__init__.py", line 2405, in run_wrapper
+    raise RuleException(
+snakemake.exceptions.RuleException: CalledProcessError in line 27 of /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile:
+Command 'python ../../scripts/prediction/evaluation.py --data ../../../data/gene_data/gene_data.csv --label ../../../data/gene_data/AllLabels_fast.csv --config models_conf.yml --model ml/LR_l1.joblib --optimize GridSearchCV' returned non-zero exit status 1.
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 27, in __rule_evaluation
+
+RuleException:
+CalledProcessError in line 27 of /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile:
+Command 'python ../../scripts/prediction/evaluation.py --data ../../../data/gene_data/gene_data.csv --label ../../../data/gene_data/AllLabels_fast.csv --config models_conf.yml --model ml/LR_l1.joblib --optimize GridSearchCV' returned non-zero exit status 1.
+  File "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/Snakefile", line 27, in __rule_evaluation
+  File "/home/fernando/mambaforge/envs/snakemake-tutorial-ml/lib/python3.8/concurrent/futures/thread.py", line 57, in run
+Shutting down, this might take some time.
+Exiting because a job execution failed. Look above for error message
+Complete log: /mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Github/BenchmarkDR/workflow/rules/prediction/.snakemake/log/2021-07-08T170321.564256.snakemake.log
+unlocking
+removing lock
+removing lock
+removed all locks
