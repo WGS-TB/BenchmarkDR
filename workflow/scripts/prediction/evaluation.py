@@ -47,18 +47,26 @@ def main():
         help='Path to the config file', required=True,
     )
     parser.add_argument(
-        '--model', dest='modelfile',
+        '--model', dest='modelname',
+        help='Name of model', required=True
+    )
+    parser.add_argument(
+        '--modelfile', dest='modelfile',metavar='FILE',
         help='Path to the model file', required=True
-        )
+    )
     parser.add_argument(
         '--optimize', dest='optimization',
         help='Name of optimization method', required=True,
+    )
+    parser.add_argument(
+        '--outfile', dest='outfile',
+        help='Name of output file', required=True
     )
     args = parser.parse_args()
 
     print("Data file = ", args.datafile)
     print("Label file = ", args.labelfile)
-    print("Model file(s) = ", args.modelfile)
+    print("Model = ", args.modelname)
     print("Config file = ", args.config)
     print("Optimization = ", args.optimization)
     print("_______________________________")
@@ -71,10 +79,9 @@ def main():
                    fp=make_scorer(utils.fp), fn=make_scorer(utils.fn),
                    balanced_accuracy=make_scorer(balanced_accuracy_score))
 
-    
     print("Loading ", modelfile)
     model = load(modelfile)
-    modelname = modelfile.replace("workflow/output/prediction/", "").replace(".joblib", "")
+    modelname = args.modelname
     results=pd.DataFrame()
 
     for drug in labels.columns:
@@ -122,7 +129,8 @@ def main():
             grid.fit(X_train, y_train)
             print('Best params: {}'.format(grid.best_params_))
 
-            filename = os.path.join("results", modelname + "_" + drug + ".csv")
+            filename = args.outfile
+            filename = filename.replace(".csv", "_" + drug + ".csv")
             print('Saving cv results to {0}'.format(filename))
             cv_results = pd.DataFrame(grid.cv_results_)
             cv_results.to_csv(filename)
@@ -158,8 +166,7 @@ def main():
             
         results = results.append(result)
 
-    filename = os.path.join("results", modelname + ".csv")
-    print('Saving results to {0}'.format(filename))
-    results.to_csv(filename)
+    print('Saving results to {0}'.format(args.outfile))
+    results.to_csv(args.outfile)
             
 main()

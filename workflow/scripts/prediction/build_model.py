@@ -17,7 +17,11 @@ def main(sysargs=sys.argv[1:]):
     parser.add_argument(
         '--model-name', dest='model',
         help='Name of model in config file', required=True
-        )
+    )
+    parser.add_argument(
+        '--outfile', dest='outfile',
+        help='Name of output file', required=True
+    )
 
     args = parser.parse_args()
     model = args.model
@@ -31,7 +35,6 @@ def main(sysargs=sys.argv[1:]):
     dClassifier = dClassifier(**config_file['Models'][model]['params'])
 
     print(dClassifier)
-    filename = os.path.join("workflow/output/prediction/", model + ".joblib")
-    dump(dClassifier, filename)
+    dump(dClassifier, args.outfile)
 
 main()

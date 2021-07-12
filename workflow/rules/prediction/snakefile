@@ -1,36 +1,42 @@
 configfile: "config.yaml"
 
-path_to_data = "data/gene_data/"
-output_dir = path_to_data
+path_data = config["PATH_DATA"] + "/"
+# output_dir = path_data
 
 rule build_model:
     input:
         conf="workflow/rules/prediction/models_conf.yml"
     output:
-        "workflow/output/prediction/{method}.joblib"
+        path_data + "{bacterium}/prediction/models/{method}.joblib"
     conda:
         "../../envs/prediction/env.yml"
     shell:
-        "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {wildcards.method}"
+        "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {wildcards.method} --outfile {output}"
 
 rule evaluation:
     input:
-        data=str(path_to_data + "gene_data.csv"),
-        label=str(path_to_data + "AllLabels_fast.csv"),
-        model="workflow/output/prediction/{method}.joblib",
+        data=str("data/gene_data/gene_data.csv"),
+        #data=str(path_data + "{bacterium}/representation/gene_presence_absence/0_matrix.csv"),
+        label=str("data/gene_data/AllLabels_fast.csv"),
+        #label="data/gene_data/test_bacterium_label.csv",
+        model=path_data + "{bacterium}/prediction/models/{method}.joblib",
         conf="workflow/rules/prediction/models_conf.yml"
     params:
         cv=config["OPTIMIZATION"]
     output:
-        "results/{method}.csv"
+        # "results/{method}.csv"
+        str(path_data + "{bacterium}/prediction/results/{method}.csv")
     conda:
         "../../envs/prediction/env.yml"
     shell:
-        "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {input.model} --optimize {params.cv}"
+        "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {wildcards.method} --modelfile {input.model} --optimize {params.cv} --outfile {output}"
 
 rule aggregate_summary:
     input:
-        expand("results/{method}.csv",
-            method=config["METHODS"])
+        #expand("results/{method}.csv",
+        #    method=config["METHODS"])
+        expand(path_data + "{bacterium}/prediction/results/{method}.csv",
+            method=config["METHODS"], allow_missing=True)
     output:
-        "results/summary.csv"
+        #"results/summary.csv"
+        str(path_data + "{bacterium}/prediction/summary.csv")
