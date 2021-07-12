@@ -2,24 +2,20 @@ import glob
 import getpass
 from pathlib import Path
 import os
+import yaml
+import itertools
 
-#os.chdir("/rds/general/user/ns1920/home/project_2/workflow/rules/representation")
-configfile: "config.yml"
+configfile: "workflow/rules/representation/config.yml"
 
+#####################################################
+# Read global config  (in addition to local config) #
+#####################################################
 
-###########################
-# Configure Data Path     #
-# (do in config in future)#
-###########################
+with open("config.yaml") as file:
+    global_config = yaml.load(file, yaml.FullLoader)
 
-
-# user = getpass.getuser()
-# path_data = str(Path("/rds/general/user/" + user +
-                     "/projects/bacterial_datasets/live/pipeline_data")) + "/"
-path_data = "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Investigation/Pipeline dataset/"
-
-# specifiy bacteria (will later be done within overall config)
-BACTERIA = ["test_bacterium"]
+path_data = global_config["PATH_DATA"] + "/"
+BACTERIA = global_config["BACTERIA"]
 
 #######################################################################
 # Get Strain and Reference IDs from Folder (also other script later?) #
@@ -61,7 +57,9 @@ for bacterium in BACTERIA:
 
 ## Function to combine all single files for bacterium to combine in matrix
 
+
 def get_bacteria_strains(bacterium, representation):
+    
     files = list()
 
     if representation == "kmer":
@@ -73,11 +71,12 @@ def get_bacteria_strains(bacterium, representation):
     if representation == "annotation":
         path = path_data + "{bacterium}/data/annotation/{strain_id}.tsv"
 
-    for bacterium, strains in STRAINS_IDS.items():
-        for strain_id in strains:
+    for bacterium, strain_id in itertools.product([bacterium], STRAINS_IDS[bacterium]):
             files.append(path.format(bacterium=bacterium, strain_id=strain_id))
 
     return files
+
+
 
 # Function to only test for one bacterium
 # def get_bacteria_strains(bacterium):
@@ -94,8 +93,8 @@ def get_bacteria_strains(bacterium, representation):
 #                           #
 #############################
 
-rule all:
-   input: path_data + "test_bacterium/representation/gene_presence_absence/0_matrix.csv"
+# rule all:
+#    input: path_data + "test_bacterium/representation/gene_presence_absence/0_matrix.csv"
 
 # rule all:
 #     input:
@@ -127,7 +126,7 @@ rule fastq_to_bam:
         reference = lambda wildcards: "{path_data}{bacterium}/reference/index/{bacterium}".format(path_data=path_data, bacterium=wildcards.bacterium)
 
     conda:
-        "../../envs/representation/snps.yml"
+        "workflow/envs/representation/snps.yml"
 
     shell:
         '''
@@ -152,7 +151,7 @@ rule remove_duplicates:
         tmp_dir = path_data + "{bacterium}/data/alignment"
 
     conda:
-        "../../envs/representation/snps.yml"
+        "workflow/envs/representation/snps.yml"
 
     shell:
         '''
