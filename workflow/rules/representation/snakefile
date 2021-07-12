@@ -3,7 +3,7 @@ import getpass
 from pathlib import Path
 import os
 
-os.chdir("/rds/general/user/ns1920/home/project_2/workflow/rules/representation")
+#os.chdir("/rds/general/user/ns1920/home/project_2/workflow/rules/representation")
 configfile: "config.yml"
 
 
@@ -13,9 +13,10 @@ configfile: "config.yml"
 ###########################
 
 
-user = getpass.getuser()
-path_data = str(Path("/rds/general/user/" + user +
+# user = getpass.getuser()
+# path_data = str(Path("/rds/general/user/" + user +
                      "/projects/bacterial_datasets/live/pipeline_data")) + "/"
+path_data = "/mnt/c/Users/Fernando/Documents/MRes Biomedical Research/Project 2/Investigation/Pipeline dataset/"
 
 # specifiy bacteria (will later be done within overall config)
 BACTERIA = ["test_bacterium"]
