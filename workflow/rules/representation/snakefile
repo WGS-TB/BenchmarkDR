@@ -15,6 +15,7 @@ with open("config.yaml") as file:
     global_config = yaml.load(file, yaml.FullLoader)
 
 path_data = global_config["PATH_DATA"] + "/"
+path_output_dir = global_config["OUTPUT_DIR"] + "/"
 BACTERIA = global_config["BACTERIA"]
 
 #######################################################################
@@ -49,13 +50,13 @@ def get_bacteria_strains(bacterium, representation):
     files = list()
 
     if representation == "kmer":
-        path = path_data + "{bacterium}/representation/kmer/{strain_id}.txt"
+        path = path_output_dir + "{bacterium}/representation/kmer/{strain_id}.txt"
 
     if representation == "snps":
-        path = path_data + "{bacterium}/representation/snps/{strain_id}.snps"
+        path = path_output_dir + "{bacterium}/representation/snps/{strain_id}.snps"
 
     if representation == "annotation":
-        path = path_data + "{bacterium}/data/annotation/{strain_id}.tsv"
+        path = path_output_dir + "{bacterium}/data/annotation/{strain_id}.tsv"
 
     for bacterium, strain_id in itertools.product([bacterium], STRAINS_IDS[bacterium]):
             files.append(path.format(bacterium=bacterium, strain_id=strain_id))
@@ -63,30 +64,11 @@ def get_bacteria_strains(bacterium, representation):
     return files
 
 
-
-# Function to only test for one bacterium
-# def get_bacteria_strains(bacterium):
-#     files = list()
-#     path = path_data + "{bacterium}/representation/snps/{strain_id}.snps"
-
-#     for strain_id in STRAINS_IDS[bacterium]:
-#         files.append(path.format(bacterium=bacterium, strain_id=strain_id))
-#     return files
-
 #############################
 #                           #
 # Rules for Representations #
 #                           #
 #############################
-
-# rule all:
-#    input: path_data + "test_bacterium/representation/gene_presence_absence/0_matrix.csv"
-
-# rule all:
-#     input:
-#         expand(
-#             path_data + "{bacterium}/representation/snps/0_matrix.csv", bacterium=BACTERIA)
-
 
 ###########
 ###########
@@ -105,11 +87,11 @@ rule fastq_to_bam:
         reference = lambda wildcards: "{path_data}{bacterium}/reference/{reference_id}.fna".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
 
     output:
-        temp(path_data + "{bacterium}/data/alignment/{strain_id}_raw.bam")
+        temp(path_output_dir + "{bacterium}/data/alignment/{strain_id}_raw.bam")
 
     params:
-        reference_folder = lambda wildcards: "{path_data}{bacterium}/reference/index".format(path_data=path_data, bacterium=wildcards.bacterium),
-        reference = lambda wildcards: "{path_data}{bacterium}/reference/index/{bacterium}".format(path_data=path_data, bacterium=wildcards.bacterium)
+        reference_folder = lambda wildcards: "{path_output_dir}{bacterium}/reference/index".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
+        reference = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium)
 
     conda:
         "workflow/envs/representation/snps.yml"
@@ -127,14 +109,14 @@ rule fastq_to_bam:
 
 rule remove_duplicates:
     input:
-        path_data + "{bacterium}/data/alignment/{strain_id}_raw.bam"
+        path_output_dir + "{bacterium}/data/alignment/{strain_id}_raw.bam"
 
     output:
-        temp(path_data + "{bacterium}/data/alignment/{strain_id}_markduplicates.bam")
+        temp(path_output_dir + "{bacterium}/data/alignment/{strain_id}_markduplicates.bam")
 
     params:
-        log = path_data + "{bacterium}/data/alignment/{strain_id}_markduplicates.log",
-        tmp_dir = path_data + "{bacterium}/data/alignment"
+        log = path_output_dir + "{bacterium}/data/alignment/{strain_id}_markduplicates.log",
+        tmp_dir = path_output_dir + "{bacterium}/data/alignment"
 
     conda:
         "workflow/envs/representation/snps.yml"
@@ -161,7 +143,7 @@ rule kmer_count_fastq:
         read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq"
 
     output:
-        temp(path_data +
+        temp(path_output_dir +
              "{bacterium}/representation/kmer/{strain_id}.intermediate")
 
     params:
@@ -170,7 +152,7 @@ rule kmer_count_fastq:
         min = config["kmer_count"]["min_count"],
         max = config["kmer_count"]["max_count"],
         canonical_form = config["kmer_count"]["canonical_form"],
-        tmp_folder = path_data + "{bacterium}/representation/kmer/"
+        tmp_folder = path_output_dir + "{bacterium}/representation/kmer/"
 
     conda:
         "../../envs/representation/kmer.yml"
@@ -199,7 +181,7 @@ rule kmer_count_fasta:
         path_data + "{bacterium}/data/{strain_id}.fa"
 
     output:
-        temp(path_data +
+        temp(path_output_dir +
              "{bacterium}/representation/kmer/{strain_id}.intermediate")
 
     params:
@@ -208,7 +190,7 @@ rule kmer_count_fasta:
         min = config["kmer_count"]["min_count"],
         max = config["kmer_count"]["max_count"],
         canonical_form = config["kmer_count"]["canonical_form"],
-        tmp_folder = path_data + "{bacterium}/representation/kmer/"
+        tmp_folder = path_output_dir + "{bacterium}/representation/kmer/"
 
     conda:
         "../../envs/representation/kmer.yml"
@@ -231,10 +213,10 @@ rule kmer_count_fasta:
 
 rule kmer_count_to_txt:
     input:
-        path_data + "{bacterium}/representation/kmer/{strain_id}.intermediate"
+        path_output_dir + "{bacterium}/representation/kmer/{strain_id}.intermediate"
 
     output:
-        path_data + "{bacterium}/representation/kmer/{strain_id}.txt"
+        path_output_dir + "{bacterium}/representation/kmer/{strain_id}.txt"
 
     conda:
         "../../envs/representation/kmer.yml"
@@ -253,7 +235,7 @@ rule txt_to_matrix:
             '{bacterium}'.format(bacterium=wildcards.bacterium), "kmer")
 
     output:
-        path_data + "{bacterium}/representation/kmer/0_matrix.csv"
+        path_output_dir + "{bacterium}/representation/kmer/0_matrix.csv"
 
     conda:
         "../../envs/representation/pandas.yml"
@@ -274,11 +256,11 @@ rule txt_to_matrix:
 
 rule fastq_to_pileup:
     input:
-        bam = path_data + "{bacterium}/data/alignment/{strain_id}_markduplicates.bam",
+        bam = path_output_dir + "{bacterium}/data/alignment/{strain_id}_markduplicates.bam",
         reference = lambda wildcards: "{path_data}{bacterium}/reference/{reference_id}.fna".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
 
     output:
-        path_data + "{bacterium}/representation/snps/{strain_id}.pileup"
+        path_output_dir + "{bacterium}/representation/snps/{strain_id}.pileup"
 
     conda:
         "../../envs/representation/snps.yml"
@@ -294,10 +276,10 @@ rule fastq_to_pileup:
 
 rule pileup_to_SNP:
     input:
-        path_data + "{bacterium}/representation/snps/{strain_id}.pileup"
+        path_output_dir + "{bacterium}/representation/snps/{strain_id}.pileup"
 
     output:
-        path_data + "{bacterium}/representation/snps/{strain_id}.snps"
+        path_output_dir + "{bacterium}/representation/snps/{strain_id}.snps"
 
     conda:
         "../../envs/representation/snps.yml"
@@ -317,7 +299,7 @@ rule snps_to_matrix:
             '{bacterium}'.format(bacterium=wildcards.bacterium), "snps")
 
     output:
-        path_data + "{bacterium}/representation/snps/0_matrix.csv"
+        path_output_dir + "{bacterium}/representation/snps/0_matrix.csv"
 
     conda:
         "../../envs/representation/pandas.yml"
@@ -342,8 +324,8 @@ rule fastq_to_fasta:
         read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq"
 
     output:
-        file = path_data + "{bacterium}/data/assembly/{strain_id}/scaffolds.fasta",
-        directory = directory(path_data + "{bacterium}/data/assembly/{strain_id}")
+        file = path_output_dir + "{bacterium}/data/assembly/{strain_id}/scaffolds.fasta",
+        directory = directory(path_output_dir + "{bacterium}/data/assembly/{strain_id}")
 
     conda:
         "../../envs/representation/gene_presence_absence.yml"
@@ -368,10 +350,10 @@ rule fasta_to_gff_reference:
         reference = lambda wildcards: "{path_data}{bacterium}/reference/{reference_id}.fna".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
 
     output:
-        annotation = path_data + "{bacterium}/reference/annotation/{reference_id}.tsv"
+        annotation = path_output_dir + "{bacterium}/reference/annotation/{reference_id}.tsv"
 
     params:
-        directory = directory(path_data + "{bacterium}/reference/annotation"),
+        directory = directory(path_output_dir + "{bacterium}/reference/annotation"),
         prefix = "{reference_id}"
 
     conda:
@@ -388,13 +370,13 @@ rule fasta_to_gff_reference:
 
 rule fasta_to_gff_data:
     input:
-        path_data + "{bacterium}/data/assembly/{strain_id}/scaffolds.fasta"
+        path_output_dir + "{bacterium}/data/assembly/{strain_id}/scaffolds.fasta"
 
     output:
-        annotation = path_data + "{bacterium}/data/annotation/{strain_id}.tsv"
+        annotation = path_output_dir + "{bacterium}/data/annotation/{strain_id}.tsv"
 
     params:
-        directory = directory(path_data + "{bacterium}/data/annotation"),
+        directory = directory(path_output_dir + "{bacterium}/data/annotation"),
         prefix = "{strain_id}"
 
     conda:
@@ -413,10 +395,10 @@ rule annotations_to_matrix:
     input:
         strains = lambda wildcards: get_bacteria_strains(
             '{bacterium}'.format(bacterium=wildcards.bacterium), "annotation"),
-        reference =  lambda wildcards: "{path_data}{bacterium}/reference/annotation/{reference_id}.tsv".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
+        reference =  lambda wildcards: "{path_output_dir}{bacterium}/reference/annotation/{reference_id}.tsv".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
 
     output:
-        path_data + "{bacterium}/representation/gene_presence_absence/0_matrix.csv"
+        path_output_dir + "{bacterium}/representation/gene_presence_absence/0_matrix.csv"
 
     conda:
         "../../envs/representation/pandas.yml"
