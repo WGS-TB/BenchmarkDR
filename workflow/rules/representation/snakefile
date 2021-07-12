@@ -27,23 +27,9 @@ REFERENCE_IDS = {}
 
 for bacterium in BACTERIA:
 
-    # fastq files: reduce file names of paired-end reads to strain ID
-    file_list_fastq = glob.glob(path_data + bacterium + "/data/*.fastq")
-    if file_list_fastq:
-
-        file_list_fastq = [Path(f).stem for f in file_list_fastq]
-        file_list_fastq = list(set([f.split("_")[0] for f in file_list_fastq]))
-        STRAINS_IDS[bacterium] = file_list_fastq
-
-    # fasta files
-    file_list_fa = glob.glob(path_data + bacterium + "/data/*.fa")
-    if file_list_fa:
-
-        if STRAINS_IDS.get(bacterium):
-            STRAINS_IDS[bacterium] = STRAINS_IDS[bacterium] + \
-                [Path(f).stem for f in file_list_fa]
-        else:
-            STRAINS_IDS[bacterium] = [Path(f).stem for f in file_list_fa]
+    path_label_file = path_data  + "/" + bacterium + "/" + "AllLabels.csv"
+    labels_df = pd.read_csv(path_label_file)
+    STRAIN_IDS[bacterium] = list(labels_df["id"])
 
     # reference genomes
     file_reference_fna = glob.glob(path_data + bacterium + "/reference/*.fna")
