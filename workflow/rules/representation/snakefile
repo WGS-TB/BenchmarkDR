@@ -4,6 +4,7 @@ from pathlib import Path
 import os
 import yaml
 import itertools
+import pandas as pd
 
 configfile: "workflow/rules/representation/config.yml"
 
@@ -18,32 +19,38 @@ path_data = global_config["PATH_DATA"] + "/"
 path_output_dir = global_config["OUTPUT_DIR"] + "/"
 BACTERIA = global_config["BACTERIA"]
 
-#######################################################################
-# Get Strain and Reference IDs from Folder (also other script later?) #
-# and function to replace expand                                      #
-#######################################################################
+
+#############################
+#                           #
+#      UTIL FUNCTIONS       #
+#                           #
+#############################
+
+###################################################################
+# Get Strain (from AllLabels.csv) and Reference IDs (from folder) #
+###################################################################
 
 STRAINS_IDS = {}
 REFERENCE_IDS = {}
 
-for bacterium in BACTERIA:
+# for bacterium in BACTERIA:
 
-    path_label_file = path_data  + "/" + bacterium + "/" + "AllLabels.csv"
-    labels_df = pd.read_csv(path_label_file)
-    STRAIN_IDS[bacterium] = list(labels_df["id"])
+#     path_label_file = path_data  + "/" + bacterium + "/" + "AllLabels.csv"
+#     labels_df = pd.read_csv(path_label_file)
+#     STRAIN_IDS[bacterium] = list(labels_df["id"])
 
-    # reference genomes
-    file_reference_fna = glob.glob(path_data + bacterium + "/reference/*.fna")
-    if file_reference_fna:
-        REFERENCE_IDS[bacterium] = Path(file_reference_fna[0]).stem
+#     # reference genomes
+#     file_reference_fna = glob.glob(path_data + bacterium + "/reference/*.fna")
+#     if file_reference_fna:
+#         REFERENCE_IDS[bacterium] = Path(file_reference_fna[0]).stem
 
-    else:
-        file_reference_fa = glob.glob(path_data + bacterium + "/reference/*.fna")
-        if file_reference_fa:
-            REFERENCE_IDS[bacterium] = Path(file_reference_fa[0]).stem
+#     else:
+#         file_reference_fa = glob.glob(path_data + bacterium + "/reference/*.fa")
+#         if file_reference_fa:
+#             REFERENCE_IDS[bacterium] = Path(file_reference_fa[0]).stem
+
 
 ## Function to combine all single files for bacterium to combine in matrix
-
 
 def get_bacteria_strains(bacterium, representation):
     
@@ -62,6 +69,60 @@ def get_bacteria_strains(bacterium, representation):
             files.append(path.format(bacterium=bacterium, strain_id=strain_id))
 
     return files
+
+## Functions to count bases to determine coverage depth
+
+import re
+
+def count_bases_reference(path_reference):
+
+    base_counter = 0
+    pattern = ">"
+
+    with open(path_reference, "r") as file:
+        for line in file:
+            if not re.search(pattern, line):
+                line = line.rstrip('\n')
+                base_counter += len(line)
+
+    return base_counter
+
+import gzip
+
+def count_bases_strain(path_strain):
+
+    base_counter = 0
+    pattern = "length="
+
+    with gzip.open(path_strain, "r") as file:
+        c = 0
+        for line in file:
+                c += 1
+                if (c % 4) == 1:
+                    line = str(line).split("\\n")[0]
+                    read_length = int(line.split("length=")[1])
+                    base_counter += read_length
+
+    return (base_counter * 2)  
+
+## Create mapping for reference genome length
+
+REFERENCE_BASE_COUNT = {}
+
+for bacterium in BACTERIA:
+
+    file_reference_fna = glob.glob(path_data + bacterium + "/reference/*.fna")
+    if file_reference_fna:
+        base_count = count_bases_reference(file_reference_fna[0])
+    
+    else:
+        file_reference_fa = glob.glob(path_data + bacterium + "/reference/*.fa")
+        
+        if file_reference_fa:
+            base_count = count_bases_reference(file_reference_fa[0])
+
+    REFERENCE_BASE_COUNT[bacterium] = base_count
+
 
 
 #############################
@@ -82,8 +143,8 @@ def get_bacteria_strains(bacterium, representation):
 
 rule fastq_to_bam:
     input:
-        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq",
-        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq",
+        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq.gz",
+        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq.gz",
         reference = lambda wildcards: "{path_data}{bacterium}/reference/{reference_id}.fna".format(path_data=path_data, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
 
     output:
@@ -139,8 +200,8 @@ rule remove_duplicates:
 
 rule kmer_count_fastq:
     input:
-        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq",
-        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq"
+        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq.gz",
+        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq.gz"
 
     output:
         temp(path_output_dir +
@@ -320,19 +381,27 @@ rule snps_to_matrix:
 
 rule fastq_to_fasta:
     input:
-        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq",
-        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq"
+        read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq.gz",
+        read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq.gz"
 
     output:
         file = path_output_dir + "{bacterium}/data/assembly/{strain_id}/scaffolds.fasta",
         directory = directory(path_output_dir + "{bacterium}/data/assembly/{strain_id}")
+
+    params:
+        coverage_depth = lambda wildcards: int(count_bases_strain(path_data + "{bacterium}/data/{strain_id}_1.fastq.gz".format(bacterium=wildcards.bacterium, strain_id=wildcards.strain_id)) / REFERENCE_BASE_COUNT["{bacterium}".format(bacterium=wildcards.bacterium)])
 
     conda:
         "../../envs/representation/gene_presence_absence.yml"
 
     shell:
         '''
-        spades.py -1 {input.read_1} -2 {input.read_2} -o {output.directory}
+        if [ {params.coverage_depth} -ge 100 ]
+            then
+                spades.py --isolate -1 {input.read_1} -2 {input.read_2} -o {output.directory}
+            else
+                spades.py -1 {input.read_1} -2 {input.read_2} -o {output.directory}
+        fi
         '''
 
 
