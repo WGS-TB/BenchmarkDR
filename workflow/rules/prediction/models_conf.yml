@@ -108,6 +108,20 @@ Models:
   CNB:
     module: sklearn.naive_bayes
     model: ComplementNB
+  
+  INGOT:
+  # need to manually install via 'pip install ingotdr'
+    module: ingot
+    model: INGOTClassifier
+    params:
+      false_positive_rate_upper_bound: 0.1
+      max_rule_size: 20
+      solver_name: 'PULP_CBC_CMD'
+      solver_options:
+        timeLimit: 1800
+    cv:
+      lambda_p: [0.01, 0.1, 1, 10, 100]
+      lambda_z: [0.01, 0.1, 1, 10, 100]
 
 ModelRegressors:
   ADB:

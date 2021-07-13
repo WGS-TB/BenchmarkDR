@@ -133,7 +133,7 @@ def main():
             filename = filename.replace(".csv", "_" + drug + ".csv")
             print('Saving cv results to {0}'.format(filename))
             cv_results = pd.DataFrame(grid.cv_results_)
-            cv_results.to_csv(filename)
+            cv_results.to_csv(filename, index=False)
             print("_______________________________")
 
             result = cv_results.iloc[[grid.best_index_]]
@@ -167,6 +167,6 @@ def main():
         results = results.append(result)
 
     print('Saving results to {0}'.format(args.outfile))
-    results.to_csv(args.outfile)
+    results.to_csv(args.outfile, index =False)
             
 main()

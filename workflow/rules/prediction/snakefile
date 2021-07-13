@@ -24,7 +24,6 @@ rule evaluation:
     params:
         cv=config["OPTIMIZATION"]
     output:
-        # "results/{method}.csv"
         str(path_data + "{bacterium}/prediction/results/{method}.csv")
     conda:
         "../../envs/prediction/env.yml"
@@ -33,10 +32,9 @@ rule evaluation:
 
 rule aggregate_summary:
     input:
-        #expand("results/{method}.csv",
-        #    method=config["METHODS"])
         expand(path_data + "{bacterium}/prediction/results/{method}.csv",
             method=config["METHODS"], allow_missing=True)
     output:
-        #"results/summary.csv"
         str(path_data + "{bacterium}/prediction/summary.csv")
+    shell:
+        "python workflow/scripts/prediction/aggregate.py --data {input} --outfile {output}"
