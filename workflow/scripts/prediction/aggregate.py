@@ -19,11 +19,11 @@ def main():
     for file in args.datafiles:
         df = pd.read_csv(file)
         df.set_index(df.columns[0], inplace=True, drop=True)
-        df = df[["mean_test_balanced_accuracy"]]
+        df = df[["balanced_accuracy"]]
 
         head, tail = os.path.split(file)
         model = tail.replace(".csv", "")
-        df = df.rename(columns={"mean_test_balanced_accuracy": model})
+        df = df.rename(columns={"balanced_accuracy": model})
 
         summary = pd.concat([summary,df], axis=1)
     

@@ -1,26 +1,9 @@
 import argparse
-from joblib import load
 import numpy as np
 import time
 import pandas as pd
 import utils
 import os
-
-def evaluate(clf, X_test, y_test):
-    accuracy = clf.score(X_test, y_test)
-    print(accuracy)
-    print("_______________________________")
-
-def CVFolds(config_file):
-    module = utils.my_import(config_file['SplitterClass']['module'])
-    splitter = getattr(module, config_file['SplitterClass']['splitter'])
-    folds = splitter(**config_file['SplitterClass']['params'])
-    return folds
-
-    # ## TODO argument here for each cross validation iterator
-    # from sklearn.model_selection import (KFold, StratifiedKFold, RepeatedKFold, StratifiedShuffleSplit)
-    # folds = StratifiedShuffleSplit(n_splits=5, random_state=8)
-    # return folds
 
 def crossValidate(clf, X_train, y_train, folds):
     from sklearn.model_selection import cross_val_score
@@ -28,10 +11,9 @@ def crossValidate(clf, X_train, y_train, folds):
     print("Mean validation auc: {:.4f} +/- {:.4f}".format(np.mean(cv_scores), np.std(cv_scores)))
 
 def main():
-    from sklearn.model_selection import (train_test_split, GridSearchCV, RandomizedSearchCV)
+    from sklearn.model_selection import train_test_split
     from skopt import BayesSearchCV
-    from support import (argCheck, preprocess)
-    from sklearn.metrics import(balanced_accuracy_score, confusion_matrix, make_scorer)
+    from support import (preprocess, model_fitting, evaluate)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -72,16 +54,9 @@ def main():
     print("_______________________________")
 
     data, labels = preprocess(data = args.datafile, label = args.labelfile)
-    modelfile = args.modelfile
     config_file = utils.config_reader(args.config)
 
-    scoring = dict(Accuracy='accuracy', tp=make_scorer(utils.tp), tn=make_scorer(utils.tn),
-                   fp=make_scorer(utils.fp), fn=make_scorer(utils.fn),
-                   balanced_accuracy=make_scorer(balanced_accuracy_score))
-
-    print("Loading ", modelfile)
-    model = load(modelfile)
-    modelname = args.modelname
+    
     results=pd.DataFrame()
 
     for drug in labels.columns:
@@ -93,78 +68,35 @@ def main():
 
         X = data
         X = X.loc[~na_index,:]
-        # X = np.sign(X)
 
         print('Data shape: {}'.format(X.shape))
         print('Label shape: {}'.format(y.shape))
         print("_______________________________")
 
-
         print('Train-Test split')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42, shuffle=True)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, **config_file['TrainTestSplit'])
         print('Train data shape: {}'.format(X_train.shape))
         print('Train label shape: {}'.format(y_train.shape))
         print('Test data shape: {}'.format(X_test.shape))
         print('Test label shape: {}'.format(y_test.shape))
         print("_______________________________")
 
-        if args.optimization != "None" :
-            print('Hyper-parameter Tuning')
-            param_grid = config_file['Models'][modelname]['cv']
-            for key, value in param_grid.items():
-                if isinstance(value, str):
-                    param_grid[key] = eval(param_grid[key])
-            param_grid = {ele: (list(param_grid[ele])) for ele in param_grid}
-            print(param_grid)
-            for i in config_file['CrossValidation'].items(): print('{}: {}'.format(i[0], i[1]))
+        print('Fitting training data')
+        start_time = time.time()
+        clf = model_fitting(args, drug, X_train, y_train, config_file)
+        end_time = time.time()
+        print("_______________________________")
 
-            if args.optimization == "GridSearchCV":
-                grid = GridSearchCV(estimator=model, param_grid=param_grid,
-                            scoring=scoring, **config_file['CrossValidation'])
+        print('Testing')
+        y_pred = clf.predict(X_test)
+        print("_______________________________")
 
-            elif args.optimization == "RandomizedSearchCV":
-                grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
-                            scoring=scoring, **config_file['CrossValidation'])
-
-            grid.fit(X_train, y_train)
-            print('Best params: {}'.format(grid.best_params_))
-
-            filename = args.outfile
-            filename = filename.replace(".csv", "_" + drug + ".csv")
-            print('Saving cv results to {0}'.format(filename))
-            cv_results = pd.DataFrame(grid.cv_results_)
-            cv_results.to_csv(filename, index=False)
-            print("_______________________________")
-
-            result = cv_results.iloc[[grid.best_index_]]
-            result.insert(0, "Drug", drug)
-
-        elif args.optimization == "None" :
-            print('Not running hyper-parameter tuning')
-            print('Fitting training data')
-            print(model)
-            start_time = time.time()
-            clf = model.fit(X_train, y_train)
-            end_time = time.time()
-            print("_______________________________")
-
-            print('Evaluating')
-            evaluate(clf, X_test, y_test)
-            folds = CVFolds(config_file)
-            crossValidate(model, X_train, y_train, folds)
-            
-            y_pred = clf.predict(X_test)
-            tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
-            balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
-            sensitivity = tp/(tp + fn)
-            specificity = tn/(tn + fp)
-
-            result = dict(Drug = drug, Time= round(end_time - start_time, 2),
-                Balanced_accuracy=balanced_accuracy, tp=tp, tn=tn, fp=fp, fn=fn,
-                sensitivity = sensitivity, specificity = specificity, Model=model)
-            result = pd.DataFrame([result])
-            
+        print('Evaluating')
+        result = evaluate(y_test, y_pred)
+        result.insert(0, "Drug", drug)
+        result.insert(1, "Time", end_time-start_time)
         results = results.append(result)
+        print("_______________________________")
 
     print('Saving results to {0}'.format(args.outfile))
     results.to_csv(args.outfile, index =False)

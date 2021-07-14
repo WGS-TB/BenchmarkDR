@@ -1,6 +1,7 @@
 TrainTestSplit:
   random_state: &seed 33
-  test_size: 0.2
+  test_size: 0.1
+  shuffle: True
 
 SplitterClass:
   module: sklearn.model_selection
@@ -10,7 +11,6 @@ SplitterClass:
     random_state: 8
 
 CrossValidation:
-  cv: 5
   refit: 'balanced_accuracy'
   n_jobs: -1
   return_train_score: True
