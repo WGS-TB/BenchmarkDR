@@ -5,11 +5,6 @@ import pandas as pd
 import utils
 import os
 
-def crossValidate(clf, X_train, y_train, folds):
-    from sklearn.model_selection import cross_val_score
-    cv_scores = cross_val_score(clf, X_train, y_train, scoring='roc_auc', cv=folds)
-    print("Mean validation auc: {:.4f} +/- {:.4f}".format(np.mean(cv_scores), np.std(cv_scores)))
-
 def main():
     from sklearn.model_selection import train_test_split
     from skopt import BayesSearchCV

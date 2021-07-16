@@ -31,7 +31,7 @@ def preprocess(data, label):
 
 def model_fitting(args, drug, X_train, y_train, config_file):
     from sklearn.model_selection import (GridSearchCV, RandomizedSearchCV)
-    from sklearn.metrics import(balanced_accuracy_score, confusion_matrix, make_scorer)
+    from sklearn.metrics import(balanced_accuracy_score, make_scorer, f1_score, roc_auc_score)
     
     print("Loading ", args.modelfile)
     model = load(args.modelfile)
@@ -39,7 +39,8 @@ def model_fitting(args, drug, X_train, y_train, config_file):
 
     scoring = dict(Accuracy='accuracy', tp=make_scorer(utils.tp), tn=make_scorer(utils.tn),
                 fp=make_scorer(utils.fp), fn=make_scorer(utils.fn),
-                balanced_accuracy=make_scorer(balanced_accuracy_score))
+                balanced_accuracy=make_scorer(balanced_accuracy_score), f1score=make_scorer(f1_score),
+                roc_auc=make_scorer(roc_auc_score))
 
     if args.optimization != "None" :
         print('Hyper-parameter Tuning')
@@ -64,7 +65,7 @@ def model_fitting(args, drug, X_train, y_train, config_file):
         print('Best params: {}'.format(grid.best_params_))
 
         filename = args.outfile
-        filename = filename.replace(".csv", "_" + drug + ".csv")
+        filename = filename.replace(".csv", "_cv.csv")
         print('Saving cv results to {0}'.format(filename))
         cv_results = pd.DataFrame(grid.cv_results_)
         cv_results.to_csv(filename, index=False)
@@ -80,16 +81,17 @@ def model_fitting(args, drug, X_train, y_train, config_file):
         return clf
 
 def evaluate(y_test, y_pred):
-    from sklearn.metrics import(accuracy_score, balanced_accuracy_score, roc_auc_score, confusion_matrix)
-    
+    from sklearn.metrics import(accuracy_score, balanced_accuracy_score, roc_auc_score, confusion_matrix, f1_score)
+
     accuracy = accuracy_score(y_test, y_pred)
     balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
+    f1score = f1_score(y_test, y_pred)
     roc_auc = roc_auc_score(y_test, y_pred)
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
     sensitivity = tp/(tp + fn)
     specificity = tn/(tn + fp)
 
-    result = dict(accuracy=accuracy, balanced_accuracy=balanced_accuracy, roc_auc=roc_auc, tp=tp, tn=tn, fp=fp, fn=fn,
+    result = dict(accuracy=accuracy, balanced_accuracy=balanced_accuracy, f1_score=f1score, roc_auc=roc_auc, tp=tp, tn=tn, fp=fp, fn=fn,
         sensitivity = sensitivity, specificity = specificity)
     result = pd.DataFrame([result])
 

@@ -7,10 +7,9 @@ OUTPUT_DIR: ""
 
 REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
 
-OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
-
 # LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
 
-METHODS: ["LR_l1", "LR_l2", "SVM_l1"]
+DRUGS: ["ciprofloxacin", "moxifloxacin"]
+METHODS: ["LR_l1", "LR_l2"]
 
 OPTIMIZATION: GridSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"

@@ -14,18 +14,21 @@ CrossValidation:
   refit: 'balanced_accuracy'
   n_jobs: -1
   return_train_score: True
-  verbose: 1
+  verbose: 2
 
 Models:
   LR_l1:
     module: sklearn.linear_model
     model: LogisticRegression
     params:
+      n_jobs: -1
       penalty: 'l1'
-      solver: 'liblinear'
       class_weight: 'balanced'
+      solver: 'liblinear'
     cv:
-      C: np.logspace(-4, 4, base=10, num=5)
+      max_iter: np.logspace(1, 5, base=10, num=2)
+      solver: ['liblinear'] #'saga'
+      C: np.logspace(-4, 4, base=10, num=2)
 
   LR_l2:
     module: sklearn.linear_model
@@ -33,10 +36,24 @@ Models:
     params:
       penalty: 'l2'
       n_jobs: -1
-      solver: 'sag'
       class_weight: 'balanced'
     cv:
-      C: [0.0001, 0.001, 0.01, 0.1, 1, 10.0, 100.0, 1000.0, 10000.0] # change into np logspace
+      max_iter: np.logspace(1, 5, base=10, num=2)
+      solver: ['newton-cg'] #'sag','lbfgs'
+      C: np.logspace(-4, 4, base=10, num=2)
+
+  LR_elasticnet:
+    module: sklearn.linear_model
+    model: LogisticRegression
+    params:
+      penalty: 'elasticnet'
+      n_jobs: -1
+      class_weight: 'balanced'
+    cv:
+      max_iter: np.logspace(1, 5, base=10, num=5)
+      l1_ratio: [0.25, 0.5, 0.75]
+      solver: ['saga']
+      C: np.logspace(-4, 4, base=10, num=5)
 
   SVM_l1:
     module: sklearn.svm
@@ -44,22 +61,22 @@ Models:
     params:
       penalty: 'l1'
       dual: False
-      max_iter: 2000
+      max_iter: -1
       class_weight: 'balanced'
     cv:
       loss: ['squared_hinge']
-      C: [0.01, 0.1, 1, 10.0, 100.0]
+      C: np.logspace(-4, 4, base=10, num=5)
 
   SVM_l2:
     module: sklearn.svm
     model: LinearSVC
     params:
       penalty: 'l2'
-      max_iter: 2000
+      max_iter: -1
       class_weight: 'balanced'
     cv:
       loss: ['squared_hinge','hinge']
-      C: [0.01, 0.1, 1, 10.0, 100.0]
+      C: np.logspace(-4, 4, base=10, num=5)
 
   RF:
     module: sklearn.ensemble
