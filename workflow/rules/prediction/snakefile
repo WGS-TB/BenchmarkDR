@@ -1,13 +1,13 @@
 configfile: "config.yaml"
 
 path_data = config["PATH_DATA"] + "/"
-# output_dir = path_data
+output_dir = config["OUTPUT_DIR"] + "/"
 
 rule build_model:
     input:
         conf="workflow/rules/prediction/models_conf.yml"
     output:
-        path_data + "{bacterium}/prediction/models/{method}.joblib"
+        output_dir + "{bacterium}/prediction/models/{method}.joblib"
     conda:
         "../../envs/prediction/env.yml"
     shell:
@@ -15,16 +15,14 @@ rule build_model:
 
 rule evaluation:
     input:
-        data=str("data/gene_data/gene_data_full.csv"),
-        #data=str(path_data + "{bacterium}/representation/gene_presence_absence/0_matrix.csv"),
-        label=str("data/gene_data/label_{drug}.csv"),
-        #label="data/gene_data/test_bacterium_label.csv",
-        model=path_data + "{bacterium}/prediction/models/{method}.joblib",
+        data=str(path_data + "{bacterium}/data/gene_data_full.csv"),
+        label=str(path_data + "{bacterium}/data/label_{drug}.csv"),
+        model=output_dir + "{bacterium}/prediction/models/{method}.joblib",
         conf="workflow/rules/prediction/models_conf.yml"
     params:
         cv=config["OPTIMIZATION"]
     output:
-        str(path_data + "{bacterium}/prediction/results/{method}-{drug}.csv")
+        str(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv")
     conda:
         "../../envs/prediction/env.yml"
     shell:
@@ -32,10 +30,10 @@ rule evaluation:
 
 rule aggregate_summary:
     input:
-        expand(path_data + "{bacterium}/prediction/results/{method}-{drug}.csv",
+        expand(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv",
             method=config["METHODS"], drug=config["DRUGS"], allow_missing=True)
     output:
-        str(path_data + "{bacterium}/prediction/summary.csv")
+        str(output_dir + "{bacterium}/prediction/summary.csv")
     shell:
         "python workflow/scripts/prediction/aggregate.py --data {input} --outfile {output}"
 

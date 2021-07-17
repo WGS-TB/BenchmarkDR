@@ -47,12 +47,12 @@ Models:
     model: LogisticRegression
     params:
       penalty: 'elasticnet'
+      solver: ['saga']
       n_jobs: -1
       class_weight: 'balanced'
     cv:
       max_iter: np.logspace(1, 5, base=10, num=5)
       l1_ratio: [0.25, 0.5, 0.75]
-      solver: ['saga']
       C: np.logspace(-4, 4, base=10, num=5)
 
   SVM_l1:
@@ -61,9 +61,9 @@ Models:
     params:
       penalty: 'l1'
       dual: False
-      max_iter: -1
       class_weight: 'balanced'
     cv:
+      max_iter: np.logspace(1, 5, base=10, num=5)
       loss: ['squared_hinge']
       C: np.logspace(-4, 4, base=10, num=5)
 
@@ -72,9 +72,9 @@ Models:
     model: LinearSVC
     params:
       penalty: 'l2'
-      max_iter: -1
       class_weight: 'balanced'
     cv:
+      max_iter: np.logspace(1, 5, base=10, num=5)
       loss: ['squared_hinge','hinge']
       C: np.logspace(-4, 4, base=10, num=5)
 
