@@ -146,11 +146,11 @@ rule indexing_reference:
         reference = lambda wildcards: "{reference_path}".format(reference_path = REFERENCE_IDS[wildcards.bacterium])
 
     output:
-        amb_file = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.amb".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
-        ann_file = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.ann".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
-        bwt_file = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.bwt".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
-        pac_file = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.pac".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
-        sa_file = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.sa".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium)
+        amb_file = path_output_dir + "{bacterium}/reference/index/{bacterium}.amb",
+        ann_file = path_output_dir + "{bacterium}/reference/index/{bacterium}.ann",
+        bwt_file = path_output_dir + "{bacterium}/reference/index/{bacterium}.bwt",
+        pac_file = path_output_dir + "{bacterium}/reference/index/{bacterium}.pac",
+        sa_file = path_output_dir + "{bacterium}/reference/index/{bacterium}.sa"
 
     params:
         reference_folder = lambda wildcards: "{path_output_dir}{bacterium}/reference/index".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
@@ -169,7 +169,7 @@ rule fastq_to_bam:
     input:
         read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq.gz",
         read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq.gz",
-        reference_files = expand(lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.{file_type}".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium, file_type=["amb", "ann", "bwt", "pac", "sa"]))
+        reference_files = lambda wildcards: expand("{path_output_dir}{bacterium}/reference/index/{bacterium}.{file_type}".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium, file_type=["amb", "ann", "bwt", "pac", "sa"]))
 
     output:
         temp(path_output_dir + "{bacterium}/data/alignment/{strain_id}_raw.bam")
