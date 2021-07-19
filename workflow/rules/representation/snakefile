@@ -169,7 +169,11 @@ rule fastq_to_bam:
     input:
         read_1 = path_data + "{bacterium}/data/{strain_id}_1.fastq.gz",
         read_2 = path_data + "{bacterium}/data/{strain_id}_2.fastq.gz",
-        reference_files = lambda wildcards: expand("{path_output_dir}{bacterium}/reference/index/{bacterium}.{file_type}".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium, file_type=["amb", "ann", "bwt", "pac", "sa"]))
+        reference_amb = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.amb".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
+        reference_ann = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.ann".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
+        reference_bwt = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.bwt".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
+        reference_pac = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.pac".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium),
+        reference_sa = lambda wildcards: "{path_output_dir}{bacterium}/reference/index/{bacterium}.sa".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium)
 
     output:
         temp(path_output_dir + "{bacterium}/data/alignment/{strain_id}_raw.bam")
