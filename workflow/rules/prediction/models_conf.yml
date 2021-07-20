@@ -12,7 +12,7 @@ SplitterClass:
 
 CrossValidation:
   refit: 'balanced_accuracy'
-  n_jobs: -1
+  n_jobs: 8
   return_train_score: True
   verbose: 2
 
@@ -26,9 +26,9 @@ Models:
       class_weight: 'balanced'
       solver: 'liblinear'
     cv:
-      max_iter: np.logspace(1, 5, base=10, num=2)
-      solver: ['liblinear'] #'saga'
-      C: np.logspace(-4, 4, base=10, num=2)
+      max_iter: np.logspace(1, 5, base=10, num=5)
+      solver: ['liblinear', 'saga']
+      C: np.logspace(-4, 4, base=10, num=5)
 
   LR_l2:
     module: sklearn.linear_model
@@ -38,9 +38,9 @@ Models:
       n_jobs: -1
       class_weight: 'balanced'
     cv:
-      max_iter: np.logspace(1, 5, base=10, num=2)
-      solver: ['newton-cg'] #'sag','lbfgs'
-      C: np.logspace(-4, 4, base=10, num=2)
+      max_iter: np.logspace(1, 5, base=10, num=5)
+      solver: ['newton-cg','sag','lbfgs']
+      C: np.logspace(-4, 4, base=10, num=5)
 
   LR_elasticnet:
     module: sklearn.linear_model
@@ -87,44 +87,112 @@ Models:
     cv:
       n_estimators: [100, 300, 500, 1000]
       max_depth: [5, 10, 15, 30]
-      min_samples_split: [2, 5, 10, 15, 100]
+      min_samples_split: [2, 5, 10, 15]
       min_samples_leaf: [1, 2, 5, 10]
 
   DT:
-    module: sklearn.ensemble
+    module: sklearn.tree
     model: DecisionTreeClassifier
+    params:
+      n_jobs: -1
+      class_weight: 'balanced'
+      max_features: 'auto'
+    cv:
+      max_depth: [5, 10, 15, 30]
+      min_samples_split: [2, 5, 10, 15]
+      min_samples_leaf: [1, 2, 5, 10]
   
   ET:
     module: sklearn.ensemble
     model: ExtraTreesClassifier
+    params:
+      n_jobs: -1
+      class_weight: 'balanced'
+    cv:
+      n_estimators: [100, 300, 500, 1000]
+      max_depth: [5, 10, 15, 30]
+      min_samples_split: [2, 5, 10, 15]
+      min_samples_leaf: [1, 2, 5, 10]
 
   ADB:
     module: sklearn.ensemble
     model: AdaBoostClassifier
+    cv:
+      n_estimators: [50, 100, 500, 1000]
+      learning_rate: [0.0001, 0.001, 0.01, 0.1, 1.0]
 
   GBT:
     module: sklearn.ensemble
     model: GradientBoostingClassifier
+    params:
+      max_features: 'auto'
+    cv:
+      learning_rate: [0.001, 0.01, 0.1, 1]
+      n_estimators: [100, 300, 500, 1000]
+      min_samples_split: [2, 5, 10, 15]
+      max_depth: [5, 10, 15, 30]
 
-  SGD:
+  SGD_l1:
     module: sklearn.linear_model
     model: SGDClassifier
+    params:
+      n_jobs: -1
+      class_weight: 'balanced'
+    cv:
+      penalty: ['l1']
+      max_iter: np.logspace(1, 5, base=10, num=5)
+      loss: ['hinge', 'log']
+      alpha: np.logspace(-4, 0, base=10, num=5)
+
+  SGD_l2:
+    module: sklearn.linear_model
+    model: SGDClassifier
+    params:
+      n_jobs: -1
+      class_weight: 'balanced'
+    cv:
+      penalty: ['l2']
+      max_iter: np.logspace(1, 5, base=10, num=5)
+      loss: ['hinge', 'log']
+      alpha: np.logspace(-4, 0, base=10, num=5)
+    
+  SGD_elasticnet:
+    module: sklearn.linear_model
+    model: SGDClassifier
+    params:
+      n_jobs: -1
+      class_weight: 'balanced'
+    cv:
+      penalty: ['elasticnet']
+      max_iter: np.logspace(2, 5, base=10, num=4)
+      loss: ['hinge', 'log']
+      alpha: np.logspace(-4, 0, base=10, num=5)
+      l1_ratio: [0.25, 0.5, 0.75]
 
   KNN:
     module: sklearn.neighbors
     model: KNeighborsClassifier
-
-  NCC:
-    module: sklearn.neighbors
-    model: NearestCentroid
+    params:
+      n_jobs: -1
+    cv:
+      n_neighbors: [3,5,10,15]
+      leaf_size: [20,30,40]
+      p: [1,2]
+      weights: ['uniform', 'distance']
 
   GNB:
     module: sklearn.naive_bayes
     model: GaussianNB
+    cv:
+      var_smoothing: np.logspace(-9, 0, base=10, num=10)
   
   CNB:
     module: sklearn.naive_bayes
     model: ComplementNB
+    cv:
+      alpha: [0.01, 0.1, 0.5, 1.0, 10.0]
+      norm: [False, True]
+      
   
   INGOT:
   # need to manually install via 'pip install ingotdr'

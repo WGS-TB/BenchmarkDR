@@ -29,6 +29,6 @@ def main():
     
     print(summary)
     print("Saving summary to ", args.outfile)
-    summary.to_csv(args.outfile)
+    summary.to_csv(args.outfile, index=False)
 
 main()

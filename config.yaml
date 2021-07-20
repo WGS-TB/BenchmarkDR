@@ -1,6 +1,7 @@
 #PATH_DATA: "/mnt/c/Users/Fernando/Documents/Project_2/Pipeline_dataset"
 PATH_DATA: "/rds/general/user/fg520/home/Project2/pipeline_dataset" # specifiy path to folder where data is stored (only folder name, no / afterwards)
 
+#BACTERIA: ["test_bacterium"]
 BACTERIA: ["mtb"]
 
 #OUTPUT_DIR: "/mnt/c/Users/Fernando/Documents/Project_2/output"
@@ -10,8 +11,8 @@ REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
 
 # LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
 
-DRUGS: ["ciprofloxacin", "moxifloxacin"]
+DRUGS: ["amikacin", "capreomycin", "ciprofloxacin", "ethambutol", "ethionamide", "isoniazid", "kanamycin", "moxifloxacin", "ofloxacin", "pyrazinamide", "rifampicin", "streptomycin"]
 
-METHODS: ["LR_l1", "LR_l2"]
+METHODS: ["LR_l1", "LR_l2", "LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "GNB", "CNB", "SVM_l1", "SVM_l2", "KNN"]
 
 OPTIMIZATION: GridSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"

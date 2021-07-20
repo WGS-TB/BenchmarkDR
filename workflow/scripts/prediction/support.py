@@ -1,7 +1,7 @@
 import utils
 import pandas as pd
 import numpy as np
-from joblib import load
+from joblib import (load, dump)
 
 def CVFolds(config_file):
     module = utils.my_import(config_file['SplitterClass']['module'])
@@ -63,6 +63,11 @@ def model_fitting(args, drug, X_train, y_train, config_file):
         
         grid.fit(X_train, y_train)
         print('Best params: {}'.format(grid.best_params_))
+
+        filename = args.modelfile
+        filename = filename.replace(".joblib", "_grid.joblib")
+        print('Saving grid model to {0}'.format(filename))
+        dump(grid, filename)
 
         filename = args.outfile
         filename = filename.replace(".csv", "_cv.csv")

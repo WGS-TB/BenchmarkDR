@@ -25,6 +25,7 @@ rule evaluation:
         str(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv")
     conda:
         "../../envs/prediction/env.yml"
+    threads: 8
     shell:
         "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {wildcards.method} --modelfile {input.model} --optimize {params.cv} --outfile {output}"
 
