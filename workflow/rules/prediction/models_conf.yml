@@ -44,10 +44,10 @@ Models:
 
   LR_elasticnet:
     module: sklearn.linear_model
-    model: LogisticRegression
+    model: ElasticNet
     params:
       penalty: 'elasticnet'
-      solver: ['saga']
+      solver: 'saga'
       n_jobs: -1
       class_weight: 'balanced'
     cv:
@@ -94,7 +94,6 @@ Models:
     module: sklearn.tree
     model: DecisionTreeClassifier
     params:
-      n_jobs: -1
       class_weight: 'balanced'
       max_features: 'auto'
     cv:
@@ -117,6 +116,9 @@ Models:
   ADB:
     module: sklearn.ensemble
     model: AdaBoostClassifier
+    params:
+      n_estimators: 50
+      learning_rate: 0.0001
     cv:
       n_estimators: [50, 100, 500, 1000]
       learning_rate: [0.0001, 0.001, 0.01, 0.1, 1.0]
@@ -183,12 +185,16 @@ Models:
   GNB:
     module: sklearn.naive_bayes
     model: GaussianNB
+    params:
+      var_smoothing: 0.000001
     cv:
       var_smoothing: np.logspace(-9, 0, base=10, num=10)
   
   CNB:
     module: sklearn.naive_bayes
     model: ComplementNB
+    params:
+      alpha: 0.01
     cv:
       alpha: [0.01, 0.1, 0.5, 1.0, 10.0]
       norm: [False, True]
