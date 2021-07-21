@@ -446,11 +446,11 @@ rule fasta_to_gff_reference:
         reference = lambda wildcards: "{reference_path}".format(reference_path = REFERENCE_IDS[wildcards.bacterium])
 
     output:
-        annotation = path_output_dir + "{bacterium}/reference/annotation/{reference_id}.tsv"
+        annotation = path_output_dir + "{bacterium}/reference/annotation/reference.tsv"
 
     params:
         directory = directory(path_output_dir + "{bacterium}/reference/annotation/"),
-        prefix = "{reference_id}"
+        prefix = "reference"
 
     conda:
         "../../envs/representation/gene_presence_absence.yml"
@@ -491,7 +491,7 @@ rule annotations_to_matrix:
     input:
         strains = lambda wildcards: get_bacteria_strains(
             '{bacterium}'.format(bacterium=wildcards.bacterium), "annotation"),
-        reference =  lambda wildcards: "{path_output_dir}{bacterium}/reference/annotation/{reference_id}.tsv".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium, reference_id = REFERENCE_IDS[wildcards.bacterium])
+        reference =  lambda wildcards: "{path_output_dir}{bacterium}/reference/annotation/reference.tsv".format(path_output_dir=path_output_dir, bacterium=wildcards.bacterium)
 
     output:
         path_output_dir + "{bacterium}/representation/gene_presence_absence/0_matrix.csv"
