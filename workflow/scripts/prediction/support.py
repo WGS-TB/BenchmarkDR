@@ -1,33 +1,19 @@
-def argCheck():
-    import getopt
-    import sys
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "d:l:m:", ["dfile=", "lfile=", "mfile="])
-    except getopt.GetoptError as err:
-        print(err)
-        usage()
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt in ("-d", "--dfile"):
-            datafile = arg
-        elif opt in ("-l", "--lfile"):
-            labelfile = arg
-        elif opt in ("-m", "--mfile"):
-            modelfile = arg
-    print("Data file = ", datafile)
-    print("Label file = ", labelfile)
-    print("Running model = ", modelfile)
-    print("_______________________________")
+import utils
+import pandas as pd
+import numpy as np
+from joblib import (load, dump)
 
-
-    return datafile, labelfile, modelfile
+def CVFolds(config_file):
+    module = utils.my_import(config_file['SplitterClass']['module'])
+    splitter = getattr(module, config_file['SplitterClass']['splitter'])
+    folds = splitter(**config_file['SplitterClass']['params'])
+    return folds
 
 def preprocess(data, label):
-    import pandas as pd
     label = pd.read_csv(label)
     label.set_index(label.columns[0], inplace=True, drop=True)
 
-    data = pd.read_csv(data, header=None)
+    data = pd.read_csv(data)
     data.set_index(data.columns[0], inplace=True, drop=True)
     data = data.merge(label, left_index=True, right_index=True)
 
@@ -41,10 +27,77 @@ def preprocess(data, label):
     print('data set: {0}'.format(data.shape))
     print("_______________________________")
 
-
     return(data, labels)
 
-def saveObject(obj, filename):
-    import pickle as pickle
-    with open(filename, 'wb') as output:  # Overwrites any existing file.
-        pickle.dump(obj, output, pickle.HIGHEST_PROTOCOL)
+def model_fitting(args, drug, X_train, y_train, config_file):
+    from sklearn.model_selection import (GridSearchCV, RandomizedSearchCV)
+    from sklearn.metrics import(balanced_accuracy_score, make_scorer, f1_score, roc_auc_score)
+    
+    print("Loading ", args.modelfile)
+    model = load(args.modelfile)
+    modelname = args.modelname
+
+    scoring = dict(Accuracy='accuracy', tp=make_scorer(utils.tp), tn=make_scorer(utils.tn),
+                fp=make_scorer(utils.fp), fn=make_scorer(utils.fn),
+                balanced_accuracy=make_scorer(balanced_accuracy_score), f1score=make_scorer(f1_score),
+                roc_auc=make_scorer(roc_auc_score))
+
+    if args.optimization != "None" :
+        print('Hyper-parameter Tuning')
+        param_grid = config_file['Models'][modelname]['cv']
+        for key, value in param_grid.items():
+            if isinstance(value, str):
+                param_grid[key] = eval(param_grid[key])
+        param_grid = {ele: (list(param_grid[ele])) for ele in param_grid}
+        print(param_grid)
+        for i in config_file['CrossValidation'].items(): print('{}: {}'.format(i[0], i[1]))
+
+        if args.optimization == "GridSearchCV":
+            grid = GridSearchCV(estimator=model, param_grid=param_grid,
+                        scoring=scoring, cv=CVFolds(config_file), **config_file['CrossValidation'])
+
+        elif args.optimization == "RandomizedSearchCV":
+            grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
+                        scoring=scoring, cv=CVFolds(config_file), **config_file['CrossValidation'])
+
+        
+        grid.fit(X_train, y_train)
+        print('Best params: {}'.format(grid.best_params_))
+
+        filename = args.modelfile
+        filename = filename.replace(".joblib", "_grid.joblib")
+        print('Saving grid model to {0}'.format(filename))
+        dump(grid, filename)
+
+        filename = args.outfile
+        filename = filename.replace(".csv", "_cv.csv")
+        print('Saving cv results to {0}'.format(filename))
+        cv_results = pd.DataFrame(grid.cv_results_)
+        cv_results.to_csv(filename, index=False)
+        print("_______________________________")
+
+        return grid
+
+    elif args.optimization == "None" :
+        print('Not running hyper-parameter tuning')
+        clf = model.fit(X_train, y_train)
+        print("_______________________________")
+
+        return clf
+
+def evaluate(y_test, y_pred):
+    from sklearn.metrics import(accuracy_score, balanced_accuracy_score, roc_auc_score, confusion_matrix, f1_score)
+
+    accuracy = accuracy_score(y_test, y_pred)
+    balanced_accuracy = balanced_accuracy_score(y_test, y_pred)
+    f1score = f1_score(y_test, y_pred)
+    roc_auc = roc_auc_score(y_test, y_pred)
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+    sensitivity = tp/(tp + fn)
+    specificity = tn/(tn + fp)
+
+    result = dict(accuracy=accuracy, balanced_accuracy=balanced_accuracy, f1_score=f1score, roc_auc=roc_auc, tp=tp, tn=tn, fp=fp, fn=fn,
+        sensitivity = sensitivity, specificity = specificity)
+    result = pd.DataFrame([result])
+
+    return result

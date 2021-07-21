@@ -15,24 +15,26 @@ def main(sysargs=sys.argv[1:]):
         help='Path to the config file', required=True,
     )
     parser.add_argument(
-        '--model-name', dest='models', nargs='+',
+        '--model-name', dest='model',
         help='Name of model in config file', required=True
-        )
+    )
+    parser.add_argument(
+        '--outfile', dest='outfile',
+        help='Name of output file', required=True
+    )
 
     args = parser.parse_args()
-    models = args.models
+    model = args.model
     print("________________")
-    print(models)
+    print(model)
 
     config_file = utils.config_reader(args.config)
     
-    for model in models:
-        current_module = utils.my_import(config_file['Models'][model]['module'])
-        dClassifier = getattr(current_module, config_file['Models'][model]['model'])
-        dClassifier = dClassifier(**config_file['Models'][model]['params'])
+    current_module = utils.my_import(config_file['Models'][model]['module'])
+    dClassifier = getattr(current_module, config_file['Models'][model]['model'])
+    dClassifier = dClassifier(**config_file['Models'][model]['params'])
 
-        print(dClassifier)
-        filename = os.path.join("workflow/output/prediction/", model + ".joblib")
-        dump(dClassifier, filename)
+    print(dClassifier)
+    dump(dClassifier, args.outfile)
 
 main()

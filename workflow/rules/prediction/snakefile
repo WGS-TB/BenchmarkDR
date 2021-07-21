@@ -1,30 +1,41 @@
 configfile: "config.yaml"
 
+path_data = config["PATH_DATA"] + "/"
+output_dir = config["OUTPUT_DIR"] + "/"
+
 rule build_model:
     input:
         conf="workflow/rules/prediction/models_conf.yml"
-    params:
-        methods=config["METHODS"]
     output:
-        expand("workflow/output/prediction/{method}.joblib",
-            method=config["METHODS"])
+        output_dir + "{bacterium}/prediction/models/{method}.joblib"
     conda:
-        "workflow/envs/prediction/env.yml"
+        "../../envs/prediction/env.yml"
     shell:
-        "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {params.methods}"
+        "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {wildcards.method} --outfile {output}"
 
 rule evaluation:
     input:
-        data="data/gene_data/gene_data.csv",
-        label="data/gene_data/AllLabels_fast.csv",
-        model=expand("workflow/output/prediction/{method}.joblib",
-            method=config["METHODS"]),
+        data=str(path_data + "{bacterium}/data/gene_data_full.csv"),
+        label=str(path_data + "{bacterium}/data/label_{drug}.csv"),
+        model=output_dir + "{bacterium}/prediction/models/{method}.joblib",
         conf="workflow/rules/prediction/models_conf.yml"
     params:
         cv=config["OPTIMIZATION"]
     output:
-        "results/summary.csv"
+        str(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv")
     conda:
-        "workflow/envs/prediction/env.yml"
+        "../../envs/prediction/env.yml"
+    threads: 8
     shell:
-        "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {input.model} --optimize {params.cv}"
+        "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {wildcards.method} --modelfile {input.model} --optimize {params.cv} --outfile {output}"
+
+rule aggregate_summary:
+    input:
+        expand(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv",
+            method=config["METHODS"], drug=config["DRUGS"], allow_missing=True)
+    output:
+        str(output_dir + "{bacterium}/prediction/summary.csv")
+    shell:
+        "python workflow/scripts/prediction/aggregate.py --data {input} --outfile {output}"
+
+# TODO rule visual_report:
