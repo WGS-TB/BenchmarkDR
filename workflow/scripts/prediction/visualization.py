@@ -9,11 +9,10 @@ import re
 import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State, MATCH, ALL
 
-
-app = dash.Dash(__name__)
-
+from dash_extensions import Lottie       # pip install dash-extensions
+import dash_bootstrap_components as dbc  # pip install dash-bootstrap-components
 
 # ---------- Import and clean data (importing csv into pandas)
 df = pd.DataFrame()
@@ -36,45 +35,158 @@ df = pd.merge(df, dfg, on = 'param_solver', how='left')
 
 df = df[df["Model"] == "SVM_l2"]
 
-# ------------------------------------------------------------------------------
-# App layout
-app.layout = html.Div([
+# df without cv-splits data
+df_sub = df[df.columns.drop(df.filter(regex=("^split|rank|std")).columns)]
 
-    html.H1("Web Application Dashboards with Dash", style={'text-align': 'center'}),
+# Bootstrap themes by Ann: https://hellodash.pythonanywhere.com/theme_explorer
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX,'https://codepen.io/chriddyp/pen/bWLwgP.css'],
+    title = 'BenchmarkDR Analytics')
+# app.css.append_css({
+#     "external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"
+# })
 
-    dcc.Dropdown(id="slct_drug",
-                 options=[
-                     {"label": i, "value": i}
-                     for i in df["Drug"].unique()],
-                 multi=False,
-                 placeholder="Select a drug",
-                 style={'width': "40%"}
-                 ),
+app.layout = dbc.Container([
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Performance summary", style={'text-align': 'center'}),
+                    dcc.Graph(id='performance-summary', figure={})
+                ])
+            ]),
+        ], width=8),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Resistance status", style={'text-align': 'center'}),
+                    dcc.Graph(id='res-status', figure={})
+                ])
+            ]),
+        ], width=4),
+    ],className='mb-2 mt-2'),
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Select", style={'text-align': 'center'}),
+                    dcc.Dropdown(id="my-model",
+                        options=[
+                            {"label": i, "value": i} for i in df["Model"].unique()],
+                        multi=False,
+                        value=df["Model"].unique()[0],
+                        style={'width': "100%"}
+                        ),
+                    dcc.RadioItems(id="my-drug",
+                        options=[
+                            {"label": i, "value": i} for i in df["Drug"].unique()],
+                        value=df["Drug"].unique()[0],
+                        labelStyle={'dispay':'block'}
+                        )
+                ])
+            ]),
+        ], width=2),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Hyperparameter visualization", style={'text-align': 'center'}), 
+                    dcc.Graph(id='hyperparameter-viz', figure={})
+                ])
+            ]),
+        ], width=5),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Line plot", style={'text-align': 'center'}),
+                    dcc.Dropdown(id="y-axis",
+                        options=[
+                            {"label": i, "value": i} for i in df.filter(regex=("^mean")).columns],
+                        multi=False,
+                        searchable=True,
+                        placeholder="Choose value for y-axis",
+                        style={'width': "40%"}
+                        ),
+                    dcc.Dropdown(id="x-axis",
+                        options=[
+                            {"label": i, "value": i} for i in df.filter(regex=("^param")).columns],
+                        multi=False,
+                        searchable=True,
+                        placeholder="Choose value for x-axis",
+                        style={'width': "40%"}
+                        ),
+                    dcc.Dropdown(id="group",
+                        options=[
+                            {"label": i, "value": i} for i in df.filter(regex=("^param")).columns],
+                        multi=False,
+                        searchable=True,
+                        placeholder="Choose value for grouping",
+                        style={'width': "40%"}
+                        ),
+                    # dcc.Dropdown(id="filter",
+                    #     options=[
+                    #         {"label": i, "value": i} for i in df.filter(regex=("^param")).columns],
+                    #     multi=True,
+                    #     searchable=True,
+                    #     placeholder="Choose value(s) for filter",
+                    #     style={'width': "40%"}
+                    #     ),
+                    html.Button("Add Filter", id="add-filter", n_clicks=0),
+                    html.Div(id='dropdown-container', children=[]),
+                    html.Div(id='dropdown-container-output'),
+                    dcc.Graph(id='line-plot', figure={})
+                ])
+            ]),
+        ], width=5),
+    ],className='mb-2'),
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Cross validation results", style={'text-align': 'center'}),
+                    dcc.Graph(id='cv-res', figure={})
+                ])
+            ]),
+        ], width=4),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Train-test results", style={'text-align': 'center'}),
+                    dcc.Graph(id='train-test', figure={})
+                ])
+            ]),
+        ], width=4),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Features", style={'text-align': 'center'}),
+                    dcc.Graph(id='features', figure={})
+                ])
+            ]),
+        ], width=4),
+    ],className='mb-2'),
+], fluid=True)
 
-    html.Div(id='output_container', children=[]),
-    html.Br(),
-
-    dcc.Graph(id='my_parcoord', figure={})
-
-])
 
 # ------------------------------------------------------------------------------
 # Connect the Plotly graphs with Dash Components
 
-# Connect the Plotly graphs with Dash Components
+# @app.callback(
+#     [Output(component_id='output_container', component_property='children'),
+#      Output(component_id='my_parcoord', component_property='figure')],
+#     [Input(component_id='slct_drug', component_property='value')]
+# )
+
+# ------------------------------------------------------------------------------
+# Hyperparameter visualization
 @app.callback(
-    [Output(component_id='output_container', component_property='children'),
-     Output(component_id='my_parcoord', component_property='figure')],
-    [Input(component_id='slct_drug', component_property='value')]
+    Output('hyperparameter-viz', 'figure'),
+    Input('my-model', 'value'),
+    Input('my-drug', 'value')
 )
 
-def update_graph(option_slctd):
-    print(option_slctd)
-
-    container = "The drug you selected was: {}".format(option_slctd)
-    
+def update_hyperparameter_viz(model, drug):
     dff = df.copy()
-    dff = dff[dff["Drug"] == option_slctd]
+    dff = dff[dff["Model"] == model]
+    dff = dff[dff["Drug"] == drug]
 
     fig = go.Figure(data=
         go.Parcoords(
@@ -93,8 +205,57 @@ def update_graph(option_slctd):
         )
     )
 
-    return container, fig
+    return fig
 
+
+# ------------------------------------------------------------------------------
+# Line plot
+
+@app.callback(
+    Output('dropdown-container', 'children'),
+    Input('add-filter', 'n_clicks'),
+    State('dropdown-container', 'children'))
+def display_dropdowns(n_clicks, children):
+    new_dropdown = dcc.Dropdown(
+        id={
+            'type': 'filter-dropdown',
+            'index': n_clicks
+        },
+        options=[{'label': i, 'value': i} for i in ['NYC', 'MTL', 'LA', 'TOKYO']]
+    )
+    children.append(new_dropdown)
+    return children
+
+
+@app.callback(
+    Output('line-plot', 'figure'),
+    Input('my-model', 'value'),
+    Input('my-drug', 'value'),
+    Input('y-axis', 'value'),
+    Input('x-axis', 'value'),
+    Input('group', 'value'),
+    Input('filter', 'value')
+)
+
+def update_line_plot(model, drug, y, x, group, filter):
+    dff = df.copy()
+    dff = dff[dff["Model"] == model]
+    dff = dff[dff["Drug"] == drug]
+    
+    dff = dff[[y, x, group]]
+    dff_group = dff.groupby(dff[group])
+
+    labels = dff[group].unique()
+
+    fig = go.Figure()
+
+    for i in range (0,len(labels)):
+        plot_data = dff_group.get_group(labels[i])
+        fig.add_trace(go.Scatter(x=plot_data[x], y=plot_data[y], mode='lines+markers',
+            name=labels[i]
+        ))
+
+    return fig
 
 # ------------------------------------------------------------------------------
 if __name__ == '__main__':

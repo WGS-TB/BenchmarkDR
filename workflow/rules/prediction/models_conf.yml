@@ -44,7 +44,7 @@ Models:
 
   LR_elasticnet:
     module: sklearn.linear_model
-    model: ElasticNet
+    model: LogisticRegression
     params:
       penalty: 'elasticnet'
       solver: 'saga'

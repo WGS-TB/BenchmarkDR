@@ -13,6 +13,6 @@ REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
 
 DRUGS: ["amikacin", "capreomycin", "ciprofloxacin", "ethambutol", "ethionamide", "isoniazid", "kanamycin", "moxifloxacin", "ofloxacin", "pyrazinamide", "rifampicin", "streptomycin"]
 
-METHODS: ["LR_l1", "LR_l2", "LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "GNB", "CNB", "SVM_l1", "SVM_l2", "KNN"]
+METHODS: ["LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "SVM_l1", "KNN"]
 
 OPTIMIZATION: GridSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
