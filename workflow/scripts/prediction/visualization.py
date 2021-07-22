@@ -10,6 +10,7 @@ import dash  # (version 1.12.0) pip install dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State, MATCH, ALL
+from dash.exceptions import PreventUpdate
 
 from dash_extensions import Lottie       # pip install dash-extensions
 import dash_bootstrap_components as dbc  # pip install dash-bootstrap-components
@@ -73,9 +74,6 @@ app.layout = dbc.Container([
                         style={'width': "100%"}
                         ),
                     dcc.RadioItems(id="my-drug",
-                        options=[
-                            {"label": i, "value": i} for i in df["Drug"].unique()],
-                        value=df["Drug"].unique()[0],
                         labelStyle={'dispay':'block'}
                         )
                 ])
@@ -92,31 +90,49 @@ app.layout = dbc.Container([
         dbc.Col([
             dbc.Card([
                 dbc.CardBody([
-                    html.Div(id='param_table', children=[])
-                    # dash_table.DataTable(
-                    #     id='param_table',
-                    #     columns = [{"name": i, "id": i} for i in df.columns],
-                    #     editable=False,
-                    #     filter_action="native",
-                    #     sort_action="native",
-                    #     sort_mode="multi",
-                    #     row_selectable="multi",
-                    #     row_deletable=False,
-                    #     selected_rows=[],
-                    #     page_action="native",
-                    #     page_current= 0,
-                    #     page_size= 6
-                        # page_action='none',
-                        # style_cell={
-                        # 'whiteSpace': 'normal'
-                        # },
-                        # fixed_rows={ 'headers': True, 'data': 0 },
-                        # virtualization=False,
-                    # ),
+                    html.H1("Table of parameters", style={'text-align': 'center'}),
+                    html.Div(id="param-table"),
+                    dcc.RadioItems(id="slct-x-axis"),
+                    html.Br(),
+                    dcc.RadioItems(id="slct-group")
                 ]),
             ]),
         ], width=5),
     ],className='mb-2'),
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Mean test accuracy", style={'text-align': 'center'}),
+                    dcc.Graph(id='plot-accuracy', figure={})
+                ])
+            ])
+        ], width=3),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Mean test balanced accuracy", style={'text-align': 'center'}),
+                    dcc.Graph(id='plot-balanced-accuracy', figure={})
+                ])
+            ])
+        ], width=3),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Mean test f1-score", style={'text-align': 'center'}),
+                    dcc.Graph(id='plot-f1-score', figure={})
+                ])
+            ])
+        ], width=3),
+        dbc.Col([
+            dbc.Card([
+                dbc.CardBody([
+                    html.H1("Mean test roc-auc", style={'text-align': 'center'}),
+                    dcc.Graph(id='plot-roc-auc', figure={})
+                ])
+            ])
+        ], width=3)
+    ]),
     dbc.Row([
         dbc.Col([
             dbc.Card([
@@ -143,45 +159,77 @@ app.layout = dbc.Container([
             ]),
         ], width=4),
     ],className='mb-2'),
+    dcc.Store(id='intermediate-data'),
 ], fluid=True)
 
 
 # ------------------------------------------------------------------------------
 # Connect the Plotly graphs with Dash Components
 
-# @app.callback(
-#     [Output(component_id='output_container', component_property='children'),
-#      Output(component_id='my_parcoord', component_property='figure')],
-#     [Input(component_id='slct_drug', component_property='value')]
-# )
+# ------------------------------------------------------------------------------
+# Display dropdown of drugs based on selected model
+
+@app.callback(
+    [Output('my-drug', 'options'),
+    Output('my-drug', 'value')],
+    Input('my-model', 'value')
+)
+def display_drugs(model):
+    dfc = df.copy()
+    dfc = dfc[dfc["Model"] == model]
+
+    options=[{"label": i, "value": i} for i in dfc["Drug"].unique()]
+    value=dfc["Drug"].unique()[0]
+
+    return options, value
+
+# ------------------------------------------------------------------------------
+# Storing temporary dataset
+
+@app.callback(
+    Output('intermediate-data', 'data'),
+    Input('my-model', 'value'),
+    Input('my-drug', 'value')
+)
+def select_data(model, drug):
+    dfc = df.copy()
+
+    if model is None or model == []:
+        model == MODEL
+    if drug is None or drug == []:
+        drug is DRUG
+
+    dfc = dfc[dfc["Model"] == model]
+    dfc = dfc[dfc["Drug"] == drug]
+    dfc.replace("", float("NaN"), inplace=True)
+    dfc.dropna(how='all', axis=1, inplace=True)
+    dfc = dfc.loc[:, (dfc != 0).any(axis=0)]
+
+    return dfc.to_dict('records')
 
 # ------------------------------------------------------------------------------
 # Hyperparameter visualization
 @app.callback(
     Output('hyperparameter-viz', 'figure'),
-    Input('my-model', 'value'),
-    Input('my-drug', 'value')
+    Input('intermediate-data', 'data')
 )
 
-def update_hyperparameter_viz(model, drug):
-    dff = df.copy()
-    dff = dff[dff["Model"] == model]
-    dff = dff[dff["Drug"] == drug]
+def update_hyperparameter_viz(data):
+    if data is None:
+        raise PreventUpdate
+    dfc = pd.DataFrame.from_dict(data)
+
+    dlist = []
+    for col in dfc.filter(regex=("^param_")).columns:
+        dic = dict(label = col, values = dfc[col])
+        dlist.append(dic)
+    dlist.append(dict(range = [0,1], label = 'Balanced accuracy', values = dfc['mean_test_balanced_accuracy']))
+    dlist.append(dict(label = 'Time', values = dfc['mean_fit_time']))
 
     fig = go.Figure(data=
         go.Parcoords(
             line_color = 'blue',
-            dimensions = list([
-                dict(tickvals = dff['param_solver_ind'], ticktext = ['liblinear', 'saga'],
-                    label = 'Solver', values = dff['param_solver_ind']),
-                dict(range = [min(dff['param_C_log']), max(dff['param_C_log'])],
-                    label = 'log10(C)', values = dff['param_C_log']),
-                dict(range = [min(dff['param_max_iter_log']), max(dff['param_max_iter_log'])],
-                    label = 'log10(Max iter)', values = dff['param_max_iter_log']),
-                dict(range = [0,1],
-                    label = 'Balanced accuracy', values = dff['mean_test_balanced_accuracy']),
-                dict(label = 'Time', values = dff['mean_fit_time'])
-            ])
+            dimensions = dlist
         )
     )
 
@@ -191,63 +239,171 @@ def update_hyperparameter_viz(model, drug):
 # Dash table
 
 @app.callback(
-    Output('param_table', 'children'),
-    Input('my-model', 'value'),
-    Input('my-drug', 'value'))
+    Output('param-table', 'children'),
+    Input('intermediate-data', 'data')
+)
 
-def update_param_table_data(model, drug):
-    if model is None or model == []:
-        model == MODEL
-    if drug is None or drug == []:
-        drug is DRUG
-    param_table = df.copy()
-    param_table = param_table[param_table["Model"] == model]
-    param_table = param_table[param_table["Drug"] == drug]
+def update_param_table_data(data):
+    if data is None:
+        raise PreventUpdate
 
-    param_table.replace("", float("NaN"), inplace=True)
-    param_table.dropna(how='all', axis=1, inplace=True)
+    dfc = pd.DataFrame.from_dict(data)
+    
+    columns = [{"name": i, "id": i} for i in dfc.filter(regex=("Drug|^param_")).columns]
 
     return dash_table.DataTable(
-        id='table',
-        columns = [{"name": i, "id": i} for i in param_table.filter(regex=("^param")).columns],
-        data = param_table.to_dict('records'),
-        style_cell={
-            'textAlign': 'center',
-            'color': 'black',
-            'fontFamily': 'sans-serif',
-        },
-        editable=False,
-        filter_action="native",
-        sort_action="native",
-        sort_mode="multi",
-        row_selectable="multi",
-        row_deletable=False,
-        selected_rows=[],
-        page_action="native",
-        page_current= 0,
-        page_size= 6,
-    )
+            data=data,
+            columns=columns,
+            style_cell={
+                'textAlign': 'center',
+                'color': 'black',
+                'fontFamily': 'sans-serif',
+            },
+            editable=False,
+            filter_action="native",
+            sort_action="native",
+            sort_mode="multi",
+            row_selectable="multi",
+            row_deletable=False,
+            selected_rows=[],
+            page_action="native",
+            page_current= 0,
+            page_size= 6,
+        )
 
-
-# @app.callback(
-#     Output('param_table', 'columns'),
-#     Input('my-model', 'value'),
-#     Input('my-drug', 'value'))
-
-# def update_param_table_cols(model, drug):
-#     if model is None or model == []:
-#         model == MODEL
-#     if drug is None or drug == []:
-#         drug is DRUG
-#     param_table = df.copy()
-#     param_table = param_table[param_table["Model"] == model]
-#     param_table = param_table[param_table["Drug"] == drug]
-
-#     cols = [{"name": i, "id": i} for i in param_table.columns]
-
-#     return cols
+# ------------------------------------------------------------------------------
+# Sets of diagnostics plots (accuracy, balanced-accuracy, f1score, roc-auc)
+@app.callback(
+    [Output('slct-x-axis', 'options'),
+    Output('slct-x-axis', 'value')],
+    Input('intermediate-data', 'data')
+)
+def display_x_axis(data):
+    dfc = pd.DataFrame.from_dict(data)
     
+    options=[{"label": i, "value": i} for i in dfc.filter(regex=("^param_")).columns]
+    value=dfc.filter(regex=("^param_")).columns[0]
 
+    return options, value
+
+@app.callback(
+    [Output('slct-group', 'options'),
+    Output('slct-group', 'value')],
+    Input('intermediate-data', 'data'),
+    Input('slct-x-axis', 'value')
+)
+def display_group(data, x_val):
+    dfc = pd.DataFrame.from_dict(data)
+    dfc = dfc.drop(columns=[x_val])
+
+    options=[{"label": i, "value": i} for i in dfc.filter(regex=("^param_")).columns]
+    value=dfc.filter(regex=("^param_")).columns[0]
+
+    return options, value
+
+@app.callback(
+    Output('plot-accuracy', 'figure'),
+    Input('intermediate-data', 'data'),
+    Input('slct-x-axis', 'value'),
+    Input('slct-group', 'value')
+)
+def update_plot_accuracy(data, x_val, group):
+    dfc = pd.DataFrame.from_dict(data)
+    y_val = 'mean_test_Accuracy'
+    labels = dfc[group].unique()
+
+    dfc = dfc[[y_val, x_val, group]]
+    dfc = dfc.groupby(dfc[group])
+    
+    fig = go.Figure()
+
+    for label in labels:
+        plot_data = dfc.get_group(label)
+        fig.add_trace(go.Scatter(x=plot_data[x_val], y=plot_data[y_val], mode='lines+markers',
+            name=str(label)
+        ))
+    fig.update_layout(xaxis_title=x_val,
+                   yaxis_title=y_val)
+
+    return fig
+
+@app.callback(
+    Output('plot-balanced-accuracy', 'figure'),
+    Input('intermediate-data', 'data'),
+    Input('slct-x-axis', 'value'),
+    Input('slct-group', 'value')
+)
+def update_plot_balanced_accuracy(data, x_val, group):
+    dfc = pd.DataFrame.from_dict(data)
+    y_val = 'mean_test_balanced_accuracy'
+    labels = dfc[group].unique()
+
+    dfc = dfc[[y_val, x_val, group]]
+    dfc = dfc.groupby(dfc[group])
+    
+    fig = go.Figure()
+
+    for label in labels:
+        plot_data = dfc.get_group(label)
+        fig.add_trace(go.Scatter(x=plot_data[x_val], y=plot_data[y_val], mode='lines+markers',
+            name=str(label)
+        ))
+    fig.update_layout(xaxis_title=x_val,
+                   yaxis_title=y_val)
+
+    return fig
+
+@app.callback(
+    Output('plot-f1-score', 'figure'),
+    Input('intermediate-data', 'data'),
+    Input('slct-x-axis', 'value'),
+    Input('slct-group', 'value')
+)
+def update_plot_f1score(data, x_val, group):
+    dfc = pd.DataFrame.from_dict(data)
+    y_val = 'mean_test_f1score'
+    labels = dfc[group].unique()
+
+    dfc = dfc[[y_val, x_val, group]]
+    dfc = dfc.groupby(dfc[group])
+    
+    fig = go.Figure()
+
+    for label in labels:
+        plot_data = dfc.get_group(label)
+        fig.add_trace(go.Scatter(x=plot_data[x_val], y=plot_data[y_val], mode='lines+markers',
+            name=str(label)
+        ))
+    fig.update_layout(xaxis_title=x_val,
+                   yaxis_title=y_val)
+
+    return fig
+
+@app.callback(
+    Output('plot-roc-auc', 'figure'),
+    Input('intermediate-data', 'data'),
+    Input('slct-x-axis', 'value'),
+    Input('slct-group', 'value')
+)
+def update_plot_roc_auc(data, x_val, group):
+    dfc = pd.DataFrame.from_dict(data)
+    y_val = 'mean_test_roc_auc'
+    labels = dfc[group].unique()
+
+    dfc = dfc[[y_val, x_val, group]]
+    dfc = dfc.groupby(dfc[group])
+    
+    fig = go.Figure()
+
+    for label in labels:
+        plot_data = dfc.get_group(label)
+        fig.add_trace(go.Scatter(x=plot_data[x_val], y=plot_data[y_val], mode='lines+markers',
+            name=str(label)
+        ))
+    fig.update_layout(xaxis_title=x_val,
+                   yaxis_title=y_val)
+
+    return fig
 
 # ------------------------------------------------------------------------------
 # Line plot
@@ -255,7 +411,9 @@ def update_param_table_data(model, drug):
 @app.callback(
     Output('dropdown-container', 'children'),
     Input('add-filter', 'n_clicks'),
-    State('dropdown-container', 'children'))
+    State('dropdown-container', 'children')
+)
+
 def display_dropdowns(n_clicks, children):
     new_dropdown = dcc.Dropdown(
         id={
