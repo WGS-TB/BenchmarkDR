@@ -13,6 +13,7 @@ from dash.dependencies import Input, Output, State, MATCH, ALL
 
 from dash_extensions import Lottie       # pip install dash-extensions
 import dash_bootstrap_components as dbc  # pip install dash-bootstrap-components
+import dash_table
 
 # ---------- Import and clean data (importing csv into pandas)
 df = pd.DataFrame()
@@ -33,17 +34,12 @@ dfg = pd.DataFrame({'param_solver':df['param_solver'].unique()})
 dfg['param_solver_ind'] = dfg.index
 df = pd.merge(df, dfg, on = 'param_solver', how='left')
 
-df = df[df["Model"] == "SVM_l2"]
-
 # df without cv-splits data
 df_sub = df[df.columns.drop(df.filter(regex=("^split|rank|std")).columns)]
 
 # Bootstrap themes by Ann: https://hellodash.pythonanywhere.com/theme_explorer
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX,'https://codepen.io/chriddyp/pen/bWLwgP.css'],
     title = 'BenchmarkDR Analytics')
-# app.css.append_css({
-#     "external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"
-# })
 
 app.layout = dbc.Container([
     dbc.Row([
@@ -96,44 +92,28 @@ app.layout = dbc.Container([
         dbc.Col([
             dbc.Card([
                 dbc.CardBody([
-                    html.H1("Line plot", style={'text-align': 'center'}),
-                    dcc.Dropdown(id="y-axis",
-                        options=[
-                            {"label": i, "value": i} for i in df.filter(regex=("^mean")).columns],
-                        multi=False,
-                        searchable=True,
-                        placeholder="Choose value for y-axis",
-                        style={'width': "40%"}
-                        ),
-                    dcc.Dropdown(id="x-axis",
-                        options=[
-                            {"label": i, "value": i} for i in df.filter(regex=("^param")).columns],
-                        multi=False,
-                        searchable=True,
-                        placeholder="Choose value for x-axis",
-                        style={'width': "40%"}
-                        ),
-                    dcc.Dropdown(id="group",
-                        options=[
-                            {"label": i, "value": i} for i in df.filter(regex=("^param")).columns],
-                        multi=False,
-                        searchable=True,
-                        placeholder="Choose value for grouping",
-                        style={'width': "40%"}
-                        ),
-                    # dcc.Dropdown(id="filter",
-                    #     options=[
-                    #         {"label": i, "value": i} for i in df.filter(regex=("^param")).columns],
-                    #     multi=True,
-                    #     searchable=True,
-                    #     placeholder="Choose value(s) for filter",
-                    #     style={'width': "40%"}
-                    #     ),
-                    html.Button("Add Filter", id="add-filter", n_clicks=0),
-                    html.Div(id='dropdown-container', children=[]),
-                    html.Div(id='dropdown-container-output'),
-                    dcc.Graph(id='line-plot', figure={})
-                ])
+                    html.Div(id='param_table', children=[])
+                    # dash_table.DataTable(
+                    #     id='param_table',
+                    #     columns = [{"name": i, "id": i} for i in df.columns],
+                    #     editable=False,
+                    #     filter_action="native",
+                    #     sort_action="native",
+                    #     sort_mode="multi",
+                    #     row_selectable="multi",
+                    #     row_deletable=False,
+                    #     selected_rows=[],
+                    #     page_action="native",
+                    #     page_current= 0,
+                    #     page_size= 6
+                        # page_action='none',
+                        # style_cell={
+                        # 'whiteSpace': 'normal'
+                        # },
+                        # fixed_rows={ 'headers': True, 'data': 0 },
+                        # virtualization=False,
+                    # ),
+                ]),
             ]),
         ], width=5),
     ],className='mb-2'),
@@ -206,6 +186,67 @@ def update_hyperparameter_viz(model, drug):
     )
 
     return fig
+
+# ------------------------------------------------------------------------------
+# Dash table
+
+@app.callback(
+    Output('param_table', 'children'),
+    Input('my-model', 'value'),
+    Input('my-drug', 'value'))
+
+def update_param_table_data(model, drug):
+    if model is None or model == []:
+        model == MODEL
+    if drug is None or drug == []:
+        drug is DRUG
+    param_table = df.copy()
+    param_table = param_table[param_table["Model"] == model]
+    param_table = param_table[param_table["Drug"] == drug]
+
+    param_table.replace("", float("NaN"), inplace=True)
+    param_table.dropna(how='all', axis=1, inplace=True)
+
+    return dash_table.DataTable(
+        id='table',
+        columns = [{"name": i, "id": i} for i in param_table.filter(regex=("^param")).columns],
+        data = param_table.to_dict('records'),
+        style_cell={
+            'textAlign': 'center',
+            'color': 'black',
+            'fontFamily': 'sans-serif',
+        },
+        editable=False,
+        filter_action="native",
+        sort_action="native",
+        sort_mode="multi",
+        row_selectable="multi",
+        row_deletable=False,
+        selected_rows=[],
+        page_action="native",
+        page_current= 0,
+        page_size= 6,
+    )
+
+
+# @app.callback(
+#     Output('param_table', 'columns'),
+#     Input('my-model', 'value'),
+#     Input('my-drug', 'value'))
+
+# def update_param_table_cols(model, drug):
+#     if model is None or model == []:
+#         model == MODEL
+#     if drug is None or drug == []:
+#         drug is DRUG
+#     param_table = df.copy()
+#     param_table = param_table[param_table["Model"] == model]
+#     param_table = param_table[param_table["Drug"] == drug]
+
+#     cols = [{"name": i, "id": i} for i in param_table.columns]
+
+#     return cols
+    
 
 
 # ------------------------------------------------------------------------------
