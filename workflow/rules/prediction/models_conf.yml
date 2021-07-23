@@ -21,7 +21,7 @@ Models:
     module: sklearn.linear_model
     model: LogisticRegression
     params:
-      n_jobs: -1
+      n_jobs: 8
       penalty: 'l1'
       class_weight: 'balanced'
       solver: 'liblinear'
@@ -35,7 +35,7 @@ Models:
     model: LogisticRegression
     params:
       penalty: 'l2'
-      n_jobs: -1
+      n_jobs: 8
       class_weight: 'balanced'
     cv:
       max_iter: np.logspace(1, 5, base=10, num=5)
@@ -48,7 +48,7 @@ Models:
     params:
       penalty: 'elasticnet'
       solver: 'saga'
-      n_jobs: -1
+      n_jobs: 8
       class_weight: 'balanced'
     cv:
       max_iter: np.logspace(1, 5, base=10, num=5)
@@ -82,7 +82,7 @@ Models:
     module: sklearn.ensemble
     model: RandomForestClassifier
     params:
-      n_jobs: -1
+      n_jobs: 8
       class_weight: 'balanced'
     cv:
       n_estimators: [100, 300, 500, 1000]
@@ -105,7 +105,7 @@ Models:
     module: sklearn.ensemble
     model: ExtraTreesClassifier
     params:
-      n_jobs: -1
+      n_jobs: 8
       class_weight: 'balanced'
     cv:
       n_estimators: [100, 300, 500, 1000]
@@ -138,7 +138,7 @@ Models:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
-      n_jobs: -1
+      n_jobs: 8
       class_weight: 'balanced'
     cv:
       penalty: ['l1']
@@ -150,7 +150,7 @@ Models:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
-      n_jobs: -1
+      n_jobs: 8
       class_weight: 'balanced'
     cv:
       penalty: ['l2']
@@ -162,7 +162,7 @@ Models:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
-      n_jobs: -1
+      n_jobs: 8
       class_weight: 'balanced'
     cv:
       penalty: ['elasticnet']
@@ -175,7 +175,7 @@ Models:
     module: sklearn.neighbors
     model: KNeighborsClassifier
     params:
-      n_jobs: -1
+      n_jobs: 8
     cv:
       n_neighbors: [3,5,10,15]
       leaf_size: [20,30,40]

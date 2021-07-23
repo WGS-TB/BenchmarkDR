@@ -19,7 +19,6 @@ def main():
 
     for file in args.datafiles:
         df = pd.read_csv(file)
-        df = df[["Drug", "balanced_accuracy"]]
 
         head, tail = os.path.split(file)
         model = re.sub("(-.*)?\.csv", "", tail)
