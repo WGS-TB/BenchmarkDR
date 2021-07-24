@@ -34,8 +34,41 @@ metrics = [col for col in cols if col not in unwanted_metric]
 #             labels = pd.concat([labels, df_tmp])
 
 labels = pd.read_csv("/mnt/c/Users/Fernando/Documents/Project_2/output/mtb/prediction/labels/labels.csv")
-resistant = labels.sum(axis = 0, skipna = True)
-total = labels.count(axis = 0)
+labels.set_index(labels.columns[0], inplace=True, drop=True)
+res_status_data = pd.DataFrame({"Resistant": labels.sum(axis = 0, skipna = True),
+                                "Total": labels.count(axis = 0)})
+res_status_data["Susceptible"] = res_status_data["Total"] - res_status_data["Resistant"]
+res_status_data = res_status_data.sort_values("Total")
+
+labels_corr = labels.corr()
+
+# ------------------------------------------------------------------------------
+# Summary statistics based on resitance labels data
+fig_res_status = go.Figure()
+fig_res_status.add_trace(go.Bar(
+    y = res_status_data.index,
+    x = res_status_data["Resistant"],
+    name = 'Resistant',
+    orientation='h'
+))
+fig_res_status.add_trace(go.Bar(
+    y = res_status_data.index,
+    x = res_status_data["Susceptible"],
+    name = 'Susceptible',
+    orientation='h'
+))
+fig_res_status.update_layout(barmode='stack', template="plotly_dark",
+                            plot_bgcolor= 'rgba(0, 0, 0, 0)',
+                            paper_bgcolor= 'rgba(0, 0, 0, 0)')
+
+fig_labels_corr = go.Figure(data=go.Heatmap(
+                                z=labels_corr,
+                                x=labels_corr.index,
+                                y=labels_corr.columns,
+                                hoverongaps=False))
+fig_labels_corr.update_layout(template="plotly_dark",
+                            plot_bgcolor= 'rgba(0, 0, 0, 0)',
+                            paper_bgcolor= 'rgba(0, 0, 0, 0)')
 
 # ---------- Import and clean data (importing csv into pandas)
 df = pd.DataFrame()
@@ -56,155 +89,150 @@ dfg = pd.DataFrame({'param_solver':df['param_solver'].unique()})
 dfg['param_solver_ind'] = dfg.index
 df = pd.merge(df, dfg, on = 'param_solver', how='left')
 
-# df without cv-splits data
-df_sub = df[df.columns.drop(df.filter(regex=("^split|rank|std")).columns)]
-
 # Bootstrap themes by Ann: https://hellodash.pythonanywhere.com/theme_explorer
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX,'https://codepen.io/chriddyp/pen/bWLwgP.css'],
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX, dbc.themes.DARKLY,'https://codepen.io/chriddyp/pen/bWLwgP.css'],
     title = 'BenchmarkDR Analytics')
 
-app.layout = dbc.Container([
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Performance summary", style={'text-align': 'center'}),
-                    dcc.Graph(id='performance-summary', figure={}),
-                    dcc.RadioItems(id="slct-metric",
-                        options=[{"label": i, "value": i} for i in metrics],
-                        value = metrics[1],
-                        labelStyle={'dispay': 'inline-block'}
-                    )
-                ])
-            ]),
-        ], width=8),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Resistance status", style={'text-align': 'center'}),
-                    dcc.Graph(id='res-status', figure={})
-                ])
-            ]),
-        ], width=4),
-    ],className='mb-2 mt-2'),
+app.layout = html.Div([
+    dbc.Container([
         dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Best performance table", style={'text-align': 'center'}),
-                    html.Div(id="summary-table"),
-                ])
-            ]),
-        ], width=8),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Resistance correlation", style={'text-align': 'center'}),
-                    dcc.Graph(id='res-corr', figure={})
-                ])
-            ]),
-        ], width=4),
-    ],className='mb-2 mt-2'),
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Select", style={'text-align': 'center'}),
-                    html.P("Select a model:"),
-                    dcc.Dropdown(id="my-model",
-                        options=[
-                            {"label": i, "value": i} for i in df["Model"].unique()],
-                        multi=False,
-                        value=df["Model"].unique()[0],
-                        style={'width': "100%"}
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("BenchmarkDR Analytics", style={'text-align': 'left', "color": "white"})
+                    ])
+                ], color="dark", inverse=True, style={'borderRadius':'20px'}),
+            ], width=12)
+        ]),
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Performance summary", style={'text-align': 'left', "color": "white"}),
+                        dcc.Graph(id='performance-summary', figure={}),
+                        dcc.RadioItems(id="slct-metric",
+                            options=[{"label": i, "value": i} for i in metrics],
+                            value = metrics[1],
+                            labelStyle={'dispay': 'inline-block'}
                         ),
-                    html.P("Select a drug:"),
-                    dcc.RadioItems(id="my-drug",
-                        labelStyle={'dispay':'block'}
-                    )
-                ])
-            ]),
-        ], width=2),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Hyperparameter visualization", style={'text-align': 'center'}), 
-                    dcc.Graph(id='hyperparameter-viz', figure={})
-                ])
-            ]),
-        ], width=5),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Table of parameters", style={'text-align': 'center'}),
-                    html.Div(id="param-table"),
-                ]),
-            ]),
-        ], width=5),
-    ],className='mb-2'),
-    dbc.Row([
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Select", style={'text-align': 'center'}),
+                        html.Br(),
+                        html.Div(id="summary-table"),
+                    ])
+                ], color="dark", inverse=True, style={'borderRadius':'20px'}),
+            ], width=8),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Resistance status", style={'text-align': 'left', "color": "white"}),
+                        dcc.Graph(id='res-status', figure=fig_res_status),
+                        html.Br(),
+                        dcc.Graph(id='res-corr', figure=fig_labels_corr)
+                    ])
+                ], color="dark", inverse=True, style={'borderRadius':'20px'}),
+            ], width=4),
+        ],className='mb-2 mt-2'),
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Select", style={'text-align': 'left', "color": "white"}),
+                        html.P("Select a model:"),
+                        dcc.Dropdown(id="my-model",
+                            options=[
+                                {"label": i, "value": i} for i in df["Model"].unique()],
+                            multi=False,
+                            value=df["Model"].unique()[0],
+                            style={'width': "100%"}
+                            ),
+                        html.P("Select a drug:"),
+                        dcc.RadioItems(id="my-drug",
+                            labelStyle={'dispay':'block'}
+                        )
+                    ])
+                ], color="dark", inverse=True, style={'borderRadius':'20px'}),
+            ], width=2),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Hyperparameter visualization", style={'text-align': 'left', "color": "white"}), 
+                        dcc.Graph(id='hyperparameter-viz', figure={})
+                    ])
+                ], color="dark", inverse=True, style={'borderRadius':'20px'}),
+            ], width=5),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Table of parameters", style={'text-align': 'left', "color": "white"}),
+                        html.Div(id="param-table"),
+                    ]),
+                ], color="dark", inverse=True, style={'borderRadius':'20px'}),
+            ], width=5),
+        ],className='mb-2'),
+        dbc.Row([
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Select", style={'text-align': 'left', "color": "white"}),
 
-                    html.P("Select train/test:"),
-                    dcc.RadioItems(id='slct-train-test',
-                    options=[{"label": i, "value": i} for i in ["test", "train"]], value="test",
-                    labelStyle={'display': 'block'}),
-                    html.Br(),
-                    
-                    html.P("Select y-axis:"),
-                    dcc.RadioItems(id='slct-y-axis',labelStyle={'display': 'block'}),
-                    html.Br(),
+                        html.P("Select train/test:"),
+                        dcc.RadioItems(id='slct-train-test',
+                        options=[{"label": i, "value": i} for i in ["test", "train"]], value="test",
+                        labelStyle={'display': 'block'}),
+                        html.Br(),
+                        
+                        html.P("Select y-axis:"),
+                        dcc.RadioItems(id='slct-y-axis',labelStyle={'display': 'block'}),
+                        html.Br(),
 
-                    html.P("Select x-axis:"),
-                    dcc.RadioItems(id="slct-x-axis", labelStyle={'display': 'block'}),
-                    html.Br(),
+                        html.P("Select x-axis:"),
+                        dcc.RadioItems(id="slct-x-axis", labelStyle={'display': 'block'}),
+                        html.Br(),
 
-                    html.P("Select grouping parameter:"),
-                    dcc.RadioItems(id="slct-group")
-                ])
-            ]),
-        ], width=2),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Diagnostic plot", style={'text-align': 'center'}),
-                    dcc.Graph(id='plot-diagnostics', figure={})
-                ])
-            ])
-        ], width=4),
-        dbc.Col([
-            dbc.Card([
-                dbc.CardBody([
-                    html.H1("Cross validation results", style={'text-align': 'center'}),
-                    dcc.RadioItems(id="slct-cv-option"),
-                    dcc.Graph(id='cv-res', figure={})
-                ])
-            ]),
-        ], width=6)
-    ]),
-    # dbc.Row([
-    #     dbc.Col([
-    #         dbc.Card([
-    #             dbc.CardBody([
-    #                 html.H1("Train-test results", style={'text-align': 'center'}),
-    #                 dcc.Graph(id='train-test', figure={})
-    #             ])
-    #         ]),
-    #     ], width=4),
-    #     dbc.Col([
-    #         dbc.Card([
-    #             dbc.CardBody([
-    #                 html.H1("Features", style={'text-align': 'center'}),
-    #                 dcc.Graph(id='features', figure={})
-    #             ])
-    #         ]),
-    #     ], width=4),
-    # ],className='mb-2'),
-    dcc.Store(id='intermediate-data'),
-], fluid=True)
+                        html.P("Select grouping parameter:"),
+                        dcc.RadioItems(id="slct-group")
+                    ])
+                ], color="dark", inverse=True, style={'borderRadius':'20px'}),
+            ], width=2),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Diagnostic plot", style={'text-align': 'left', "color": "white"}),
+                        dcc.Graph(id='plot-diagnostics', figure={})
+                    ])
+                ], color="dark", inverse=True, style={'borderRadius':'20px'})
+            ], width=4),
+            dbc.Col([
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Cross validation results", style={'text-align': 'left', "color": "white"}),
+                        dcc.RadioItems(id="slct-cv-option"),
+                        dcc.Graph(id='cv-res', figure={})
+                    ])
+                ], color="dark", inverse=True, style={'borderRadius':'20px'}),
+            ], width=6)
+        ]),
+        # dbc.Row([
+        #     dbc.Col([
+        #         dbc.Card([
+        #             dbc.CardBody([
+        #                 html.H5("Train-test results", style={'text-align': 'left'}),
+        #                 dcc.Graph(id='train-test', figure={})
+        #             ])
+        #         ]),
+        #     ], width=4),
+        #     dbc.Col([
+        #         dbc.Card([
+        #             dbc.CardBody([
+        #                 html.H5("Features", style={'text-align': 'left'}),
+        #                 dcc.Graph(id='features', figure={})
+        #             ])
+        #         ]),
+        #     ], width=4),
+        # ],className='mb-2'),
+        dcc.Store(id='intermediate-data'),
+    ], fluid=True)
+])
+
 
 
 # ------------------------------------------------------------------------------
@@ -220,6 +248,12 @@ app.layout = dbc.Container([
 def display_performance_summary(metric):
     dfc = summary.copy()
     fig = px.scatter(dfc, x=metric, y="Drug", color="Model")
+    fig.update_layout(template="plotly_dark",
+                    plot_bgcolor= 'rgba(0, 0, 0, 0)',
+                    paper_bgcolor= 'rgba(0, 0, 0, 0)')
+    fig.update_traces(mode='markers', marker_line_width=2, marker_size=10)                
+    fig.update_xaxes(showline=False, showgrid=False)
+    fig.update_yaxes(showline=False, gridwidth=1, gridcolor='grey')
 
     return fig
 
@@ -244,11 +278,21 @@ def update_param_table_data(metric):
     return dash_table.DataTable(
             data=dfc.to_dict('records'),
             columns = columns,
+            style_header={
+                'backgroundColor': 'rgb(30, 30, 30)',
+                'fontWeight': 'bold',
+                'font_size': '15px'
+            },
             style_cell={
-                'textAlign': 'center',
-                'color': 'black',
+                'backgroundColor': 'rgb(50, 50, 50)',
+                'textAlign': 'left',
+                'color': 'white',
                 'fontFamily': 'sans-serif',
             },
+            style_data_conditional=[{
+                    'if': {'row_index': 'odd'},
+                    'backgroundColor': 'rgb(40, 40, 40)'
+            }],
             editable=False,
             sort_action="native",
             sort_mode="multi",
@@ -256,6 +300,7 @@ def update_param_table_data(metric):
             page_action="native",
             page_current= 0,
             page_size= 7,
+            style_as_list_view=True,
         )
 
 # ------------------------------------------------------------------------------
@@ -324,7 +369,9 @@ def update_hyperparameter_viz(data):
             dimensions = dlist
         )
     )
-
+    fig.update_layout(template="plotly_dark",
+                    plot_bgcolor= 'rgba(0, 0, 0, 0)',
+                    paper_bgcolor= 'rgba(0, 0, 0, 0)')
     return fig
 
 # ------------------------------------------------------------------------------
@@ -346,21 +393,29 @@ def update_param_table_data(data):
     return dash_table.DataTable(
             data=data,
             columns=columns,
+            style_header={
+                'backgroundColor': 'rgb(30, 30, 30)',
+                'fontWeight': 'bold',
+                'font_size': '15px'
+            },
             style_cell={
-                'textAlign': 'center',
-                'color': 'black',
+                'backgroundColor': 'rgb(50, 50, 50)',
+                'textAlign': 'left',
+                'color': 'white',
                 'fontFamily': 'sans-serif',
             },
+            style_data_conditional=[{
+                    'if': {'row_index': 'odd'},
+                    'backgroundColor': 'rgb(40, 40, 40)'
+            }],
             editable=False,
             filter_action="native",
             sort_action="native",
             sort_mode="multi",
-            row_selectable="multi",
-            row_deletable=False,
-            selected_rows=[],
             page_action="native",
             page_current= 0,
             page_size= 6,
+            style_as_list_view=True,
         )
 
 # ------------------------------------------------------------------------------
@@ -435,8 +490,11 @@ def update_plot_diagnostics(data, train_test, y_val, x_val, group):
         fig.add_trace(go.Scatter(x=plot_data[x_val], y=plot_data[y_lab], mode='lines+markers',
             name=str(label)
         ))
-    fig.update_layout(xaxis_title=x_val,
-                   yaxis_title=y_lab)
+    fig.update_layout(template="plotly_dark",
+                    xaxis_title=x_val,
+                    yaxis_title=y_lab,
+                    plot_bgcolor= 'rgba(0, 0, 0, 0)',
+                    paper_bgcolor= 'rgba(0, 0, 0, 0)')
 
     return fig
 
@@ -463,10 +521,13 @@ def update_plot_cv_res(data, y_val):
         fig.add_trace(go.Box(y = y_sorted[i], name=plot_data['params'][i],
         showlegend = False))
 
-    fig.update_layout(xaxis_title='params',
-                   yaxis_title=y_val,
-                   xaxis=dict(showgrid=False, zeroline=False, showticklabels=False,
-                   hoverformat='closest'))
+    fig.update_layout(template="plotly_dark",
+                    xaxis_title='params',
+                    yaxis_title=y_val,
+                    xaxis=dict(showgrid=False, zeroline=False, showticklabels=False,
+                        hoverformat='closest'),
+                    plot_bgcolor= 'rgba(0, 0, 0, 0)',
+                    paper_bgcolor= 'rgba(0, 0, 0, 0)')
 
     return fig
 
