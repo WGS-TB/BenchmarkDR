@@ -166,7 +166,11 @@ app.layout = html.Div([
                 dbc.Card([
                     dbc.CardBody([
                         html.H5("Hyperparameter visualization", style={'text-align': 'left', "color": "white"}), 
-                        dcc.Graph(id='hyperparameter-viz', figure={})
+                        dcc.Graph(id='hyperparameter-viz', figure={}),
+
+                        html.P("Check metric to display:"),
+                        dcc.Checklist(id="check-yaxis-hyperparameter-viz",
+                                    labelStyle={'display': 'inline-block'}),
                     ])
                 ], color="dark", inverse=True, style={'borderRadius':'20px'}),
             ], width=5),
@@ -175,6 +179,11 @@ app.layout = html.Div([
                     dbc.CardBody([
                         html.H5("Table of parameters", style={'text-align': 'left', "color": "white"}),
                         html.Div(id="param-table"),
+                        
+                        html.Br(),
+
+                        html.P("Check param to log transform:"),
+                        dcc.Checklist(id="param-log-transform",labelStyle={'display': 'inline-block'})
                     ]),
                 ], color="dark", inverse=True, style={'borderRadius':'20px'}),
             ], width=5),
@@ -197,7 +206,6 @@ app.layout = html.Div([
 
                         html.P("Select x-axis:"),
                         dcc.RadioItems(id="slct-x-axis", labelStyle={'display': 'block'}),
-                        dcc.Checklist(id="check-log-transform", options=[{'label': 'log-transform', 'value':'log'}]),
                         html.Br(),
 
                         html.P("Select grouping parameter:"),
@@ -212,7 +220,7 @@ app.layout = html.Div([
                         dcc.Graph(id='plot-diagnostics', figure={})
                     ])
                 ], color="dark", inverse=True, style={'borderRadius':'20px'})
-            ], width=4),
+            ], width=5),
             dbc.Col([
                 dbc.Card([
                     dbc.CardBody([
@@ -221,7 +229,7 @@ app.layout = html.Div([
                         dcc.Graph(id='cv-res', figure={})
                     ])
                 ], color="dark", inverse=True, style={'borderRadius':'20px'}),
-            ], width=6)
+            ], width=5)
         ]),
         # dbc.Row([
         #     dbc.Col([
@@ -242,6 +250,7 @@ app.layout = html.Div([
         #     ], width=4),
         # ],className='mb-2'),
         dcc.Store(id='intermediate-data'),
+        dcc.Store(id='table-data')  # TODO to relief circular dependencies of intermediate-data
     ], fluid=True)
 ])
 
@@ -278,7 +287,7 @@ def display_performance_summary(metric):
     Input('slct-metric', 'value')
 )
 
-def update_param_table_data(metric):
+def update_summary_table_data(metric):
     dfc = summary.copy().round(3)
     idx = dfc.groupby("Drug")[metric].transform(max) == dfc[metric]
     dfc = dfc[idx].sort_values("Drug")
@@ -338,15 +347,11 @@ def display_drugs(model):
 @app.callback(
     Output('intermediate-data', 'data'),
     Input('my-model', 'value'),
-    Input('my-drug', 'value')
+    Input('my-drug', 'value'),
+    Input('param-log-transform', 'value')
 )
-def select_data(model, drug):
+def select_data(model, drug, params):
     dfc = df.copy()
-
-    if model is None or model == []:
-        model == MODEL
-    if drug is None or drug == []:
-        drug is DRUG
 
     dfc = dfc[dfc["Model"] == model]
     dfc = dfc[dfc["Drug"] == drug]
@@ -354,26 +359,38 @@ def select_data(model, drug):
     dfc.dropna(how='all', axis=1, inplace=True)
     dfc = dfc.loc[:, (dfc != 0).any(axis=0)]
 
+    if params is not None:
+        for param in params:
+            dfc[param] = np.log10(dfc[param])
+
     return dfc.to_dict('records')
 
 # ------------------------------------------------------------------------------
 # Hyperparameter visualization
 @app.callback(
     Output('hyperparameter-viz', 'figure'),
-    Input('intermediate-data', 'data')
+    Input('intermediate-data', 'data'),
+    Input('check-yaxis-hyperparameter-viz', 'value')
 )
 
-def update_hyperparameter_viz(data):
+def update_hyperparameter_viz(data, metrics):
     if data is None:
         raise PreventUpdate
     dfc = pd.DataFrame.from_dict(data)
 
     dlist = []
+
     for col in dfc.filter(regex=("^param_")).columns:
         dic = dict(label = col, values = dfc[col])
         dlist.append(dic)
-    dlist.append(dict(range = [0,1], label = 'Balanced accuracy', values = dfc['mean_test_balanced_accuracy']))
-    dlist.append(dict(label = 'Time', values = dfc['mean_fit_time']))
+    if metrics is not None:
+        for metric in metrics:
+            lab = "mean_test_" + metric
+            dic = dict(label = metric, values = dfc[lab])
+            dlist.append(dic)
+
+    # dlist.append(dict(range = [0,1], label = 'Balanced accuracy', values = dfc['mean_test_balanced_accuracy']))
+    # dlist.append(dict(label = 'Time', values = dfc['mean_fit_time']))
 
     fig = go.Figure(data=
         go.Parcoords(
@@ -392,6 +409,37 @@ def update_hyperparameter_viz(data):
 
     return fig
 
+@app.callback(
+    [Output('check-yaxis-hyperparameter-viz', 'options'),
+    Output('check-yaxis-hyperparameter-viz', 'value')],
+    Input('intermediate-data', 'data')
+)
+def display_cv_res_checklist(data):
+    dfc = pd.DataFrame.from_dict(data)
+    cols = dfc.filter(regex=("^split\d+_test_")).columns
+    cols = [re.sub("^split\d+_test_", "", col) for col in cols]
+    cols = list(set(cols))
+    unwanted_metric = ['tp', 'tn', 'fp', 'fn'] # for now this is the working solution to not display certain metric
+    cols = [col for col in cols if col not in unwanted_metric]
+
+    options=[{"label": i, "value": i} for i in cols]
+    value=[cols[0]]
+
+    return options, value
+
+@app.callback(
+    Output('param-log-transform', 'options'),
+    Output('param-log-transform', 'value'),
+    Input('intermediate-data', 'data')
+)
+def checklist_param_log_transform(data):
+    dfc = pd.DataFrame.from_dict(data)
+    
+    options=[{"label": i, "value": i} for i in dfc.filter(regex=("^param_")).columns]
+    value = [dfc.filter(regex=("^param_")).columns[0]]
+
+    return options, value
+
 # ------------------------------------------------------------------------------
 # Param table
 
@@ -406,7 +454,7 @@ def update_param_table_data(data):
 
     dfc = pd.DataFrame.from_dict(data)
     
-    columns = [{"name": i, "id": i} for i in dfc.filter(regex=("Drug|^param_")).columns]
+    columns = [{"name": i, "id": i} for i in dfc.filter(regex=("^param_")).columns]
 
     return dash_table.DataTable(
             data=data,
@@ -432,7 +480,7 @@ def update_param_table_data(data):
             sort_mode="multi",
             page_action="native",
             page_current= 0,
-            page_size= 11,
+            page_size= 8,
             style_as_list_view=True,
         )
 
@@ -491,19 +539,14 @@ def display_group(data, x_val):
     Input('slct-train-test', 'value'),
     Input('slct-y-axis', 'value'),
     Input('slct-x-axis', 'value'),
-    Input('slct-group', 'value'),
-    Input("check-log-transform", 'value')
+    Input('slct-group', 'value')
 )
-def update_plot_diagnostics(data, train_test, y_val, x_val, group, transform):
-    print(transform)
+def update_plot_diagnostics(data, train_test, y_val, x_val, group):
     dfc = pd.DataFrame.from_dict(data)
     y_lab = "mean_"+train_test+"_"+ y_val
     labels = dfc[group].unique()
 
     dfc = dfc[[y_lab, x_val, group]]
-
-    if transform == ['log']:
-        dfc[x_val] = np.log10(dfc[x_val])
 
     dfc = dfc.groupby(dfc[group])
     
