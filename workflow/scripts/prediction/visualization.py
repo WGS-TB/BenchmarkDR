@@ -57,9 +57,19 @@ fig_res_status.add_trace(go.Bar(
     name = 'Susceptible',
     orientation='h'
 ))
+
+annotations = []
+for i in range(0, len(res_status_data)):
+    annotations.append(dict(y=res_status_data.index[i], x=res_status_data['Total'][i]+1000,
+                            text = 'Res: ' + str(round(res_status_data['Resistant'][i]/res_status_data['Total'][i]*100,1)) + '%',
+                            font=dict(family='Arial', size=12),
+                            showarrow=False))
+
 fig_res_status.update_layout(barmode='stack', template="plotly_dark",
                             plot_bgcolor= 'rgba(0, 0, 0, 0)',
-                            paper_bgcolor= 'rgba(0, 0, 0, 0)')
+                            paper_bgcolor= 'rgba(0, 0, 0, 0)',
+                            xaxis=dict(gridcolor="grey"),
+                            annotations=annotations)
 
 fig_labels_corr = go.Figure(data=go.Heatmap(
                                 z=labels_corr,
@@ -144,6 +154,7 @@ app.layout = html.Div([
                             value=df["Model"].unique()[0],
                             style={'width': "100%"}
                             ),
+                        html.Br(),
                         html.P("Select a drug:"),
                         dcc.RadioItems(id="my-drug",
                             labelStyle={'dispay':'block'}
@@ -186,6 +197,7 @@ app.layout = html.Div([
 
                         html.P("Select x-axis:"),
                         dcc.RadioItems(id="slct-x-axis", labelStyle={'display': 'block'}),
+                        dcc.Checklist(id="check-log-transform", options=[{'label': 'log-transform', 'value':'log'}]),
                         html.Br(),
 
                         html.P("Select grouping parameter:"),
@@ -251,7 +263,7 @@ def display_performance_summary(metric):
     fig.update_layout(template="plotly_dark",
                     plot_bgcolor= 'rgba(0, 0, 0, 0)',
                     paper_bgcolor= 'rgba(0, 0, 0, 0)')
-    fig.update_traces(mode='markers', marker_line_width=2, marker_size=10)                
+    fig.update_traces(mode='markers', marker_line_width=2, marker_size=15)                
     fig.update_xaxes(showline=False, showgrid=False)
     fig.update_yaxes(showline=False, gridwidth=1, gridcolor='grey')
 
@@ -365,13 +377,19 @@ def update_hyperparameter_viz(data):
 
     fig = go.Figure(data=
         go.Parcoords(
-            line_color = 'blue',
-            dimensions = dlist
+            labelfont = dict(size = 13),
+            rangefont = dict(size = 12),
+            tickfont = dict(size = 12),
+            dimensions = dlist,
+            # line = dict(color = 'grey'),
+            line_colorbar = dict(thickness = 12),
+            legendgrouptitle_font=dict(color = 'grey')
         )
     )
     fig.update_layout(template="plotly_dark",
                     plot_bgcolor= 'rgba(0, 0, 0, 0)',
                     paper_bgcolor= 'rgba(0, 0, 0, 0)')
+
     return fig
 
 # ------------------------------------------------------------------------------
@@ -414,7 +432,7 @@ def update_param_table_data(data):
             sort_mode="multi",
             page_action="native",
             page_current= 0,
-            page_size= 6,
+            page_size= 11,
             style_as_list_view=True,
         )
 
@@ -473,14 +491,20 @@ def display_group(data, x_val):
     Input('slct-train-test', 'value'),
     Input('slct-y-axis', 'value'),
     Input('slct-x-axis', 'value'),
-    Input('slct-group', 'value')
+    Input('slct-group', 'value'),
+    Input("check-log-transform", 'value')
 )
-def update_plot_diagnostics(data, train_test, y_val, x_val, group):
+def update_plot_diagnostics(data, train_test, y_val, x_val, group, transform):
+    print(transform)
     dfc = pd.DataFrame.from_dict(data)
     y_lab = "mean_"+train_test+"_"+ y_val
     labels = dfc[group].unique()
 
     dfc = dfc[[y_lab, x_val, group]]
+
+    if transform == ['log']:
+        dfc[x_val] = np.log10(dfc[x_val])
+
     dfc = dfc.groupby(dfc[group])
     
     fig = go.Figure()
@@ -494,7 +518,9 @@ def update_plot_diagnostics(data, train_test, y_val, x_val, group):
                     xaxis_title=x_val,
                     yaxis_title=y_lab,
                     plot_bgcolor= 'rgba(0, 0, 0, 0)',
-                    paper_bgcolor= 'rgba(0, 0, 0, 0)')
+                    paper_bgcolor= 'rgba(0, 0, 0, 0)',
+                    xaxis=dict(gridcolor="grey"),
+                    yaxis=dict(gridcolor="grey"))
 
     return fig
 
@@ -526,6 +552,7 @@ def update_plot_cv_res(data, y_val):
                     yaxis_title=y_val,
                     xaxis=dict(showgrid=False, zeroline=False, showticklabels=False,
                         hoverformat='closest'),
+                    yaxis=dict(gridcolor="grey"),
                     plot_bgcolor= 'rgba(0, 0, 0, 0)',
                     paper_bgcolor= 'rgba(0, 0, 0, 0)')
 
