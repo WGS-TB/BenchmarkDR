@@ -12,12 +12,12 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State, MATCH, ALL
 from dash.exceptions import PreventUpdate
 
-from dash_extensions import Lottie       # pip install dash-extensions
+# from dash_extensions import Lottie       # pip install dash-extensions
 import dash_bootstrap_components as dbc  # pip install dash-bootstrap-components
 import dash_table
 
 # ---------- Import summary.csv for all performance summary (importing csv into pandas)
-summary = pd.read_csv("/mnt/c/Users/Fernando/Documents/Project_2/output/mtb/prediction/summary.csv")
+summary = pd.read_csv("data/visualize_test_data/summary.csv")
 
 cols = summary.columns
 unwanted_metric = ['Model', 'Drug', 'tp', 'tn', 'fp', 'fn'] # for now this is the working solution to not display certain metric
@@ -33,7 +33,7 @@ metrics = [col for col in cols if col not in unwanted_metric]
 #             df_tmp = pd.read_csv(os.path.join(path, file))
 #             labels = pd.concat([labels, df_tmp])
 
-labels = pd.read_csv("/mnt/c/Users/Fernando/Documents/Project_2/output/mtb/prediction/labels/labels.csv")
+labels = pd.read_csv("data/visualize_test_data/labels.csv")
 labels.set_index(labels.columns[0], inplace=True, drop=True)
 res_status_data = pd.DataFrame({"Resistant": labels.sum(axis = 0, skipna = True),
                                 "Total": labels.count(axis = 0)})
@@ -152,7 +152,8 @@ app.layout = html.Div([
                                 {"label": i, "value": i} for i in df["Model"].unique()],
                             multi=False,
                             value=df["Model"].unique()[0],
-                            style={'width': "100%"}
+                            style={'width': "100%",
+                            'backgroundColor': 'black', 'color': 'black'}
                             ),
                         html.Br(),
                         html.P("Select a drug:"),
@@ -347,10 +348,9 @@ def display_drugs(model):
 @app.callback(
     Output('intermediate-data', 'data'),
     Input('my-model', 'value'),
-    Input('my-drug', 'value'),
-    Input('param-log-transform', 'value')
+    Input('my-drug', 'value')
 )
-def select_data(model, drug, params):
+def select_data(model, drug):
     dfc = df.copy()
 
     dfc = dfc[dfc["Model"] == model]
@@ -359,17 +359,29 @@ def select_data(model, drug, params):
     dfc.dropna(how='all', axis=1, inplace=True)
     dfc = dfc.loc[:, (dfc != 0).any(axis=0)]
 
+    return dfc.to_dict('records')
+
+
+@app.callback(
+    Output('table-data', 'data'),
+    Input('intermediate-data', 'data'),
+    Input('param-log-transform', 'value')
+)
+def select_data(data, params): # TODO update table data based on intermediate to relief 
+    dfc = pd.DataFrame.from_dict(data)
+
     if params is not None:
         for param in params:
             dfc[param] = np.log10(dfc[param])
 
     return dfc.to_dict('records')
 
+
 # ------------------------------------------------------------------------------
 # Hyperparameter visualization
 @app.callback(
     Output('hyperparameter-viz', 'figure'),
-    Input('intermediate-data', 'data'),
+    Input('table-data', 'data'),
     Input('check-yaxis-hyperparameter-viz', 'value')
 )
 
@@ -445,7 +457,7 @@ def checklist_param_log_transform(data):
 
 @app.callback(
     Output('param-table', 'children'),
-    Input('intermediate-data', 'data')
+    Input('table-data', 'data')
 )
 
 def update_param_table_data(data):
@@ -490,7 +502,7 @@ def update_param_table_data(data):
 @app.callback(
     [Output('slct-y-axis', 'options'),
     Output('slct-y-axis', 'value')],
-    Input('intermediate-data', 'data')
+    Input('table-data', 'data')
 )
 def display_cv_res_checklist(data):
     dfc = pd.DataFrame.from_dict(data)
@@ -508,7 +520,7 @@ def display_cv_res_checklist(data):
 @app.callback(
     [Output('slct-x-axis', 'options'),
     Output('slct-x-axis', 'value')],
-    Input('intermediate-data', 'data')
+    Input('table-data', 'data')
 )
 def display_x_axis(data):
     dfc = pd.DataFrame.from_dict(data)
@@ -521,7 +533,7 @@ def display_x_axis(data):
 @app.callback(
     [Output('slct-group', 'options'),
     Output('slct-group', 'value')],
-    Input('intermediate-data', 'data'),
+    Input('table-data', 'data'),
     Input('slct-x-axis', 'value')
 )
 def display_group(data, x_val):
@@ -535,7 +547,7 @@ def display_group(data, x_val):
 
 @app.callback(
     Output('plot-diagnostics', 'figure'),
-    Input('intermediate-data', 'data'),
+    Input('table-data', 'data'),
     Input('slct-train-test', 'value'),
     Input('slct-y-axis', 'value'),
     Input('slct-x-axis', 'value'),
@@ -572,7 +584,7 @@ def update_plot_diagnostics(data, train_test, y_val, x_val, group):
 
 @app.callback(
     Output('cv-res', 'figure'),
-    Input('intermediate-data', 'data'),
+    Input('table-data', 'data'),
     Input('slct-y-axis', 'value')
 )
 def update_plot_cv_res(data, y_val):
