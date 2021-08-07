@@ -9,13 +9,13 @@ rule build_model:
     output:
         output_dir + "{bacterium}/prediction/models/{method}.joblib"
     conda:
-        "../../envs/prediction/env.yml"
+        "../../envs/prediction/ingot.yml"
     shell:
-        "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {wildcards.method} --outfile {output}"
+        "python3.8 workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {wildcards.method} --outfile {output}"
 
 rule evaluation:
     input:
-        data=str(path_data + "{bacterium}/data/gene_data_full.csv"),
+        data=str(path_data + "{bacterium}/data/0_matrix.csv"),
         label=str(path_data + "{bacterium}/data/label_{drug}.csv"),
         model=output_dir + "{bacterium}/prediction/models/{method}.joblib",
         conf="workflow/rules/prediction/models_conf.yml"
@@ -24,10 +24,10 @@ rule evaluation:
     output:
         str(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv")
     conda:
-        "../../envs/prediction/env.yml"
+        "../../envs/prediction/ingot.yml"
     threads: 8
     shell:
-        "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {wildcards.method} --modelfile {input.model} --optimize {params.cv} --outfile {output}"
+        "python3.8 workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {wildcards.method} --modelfile {input.model} --optimize {params.cv} --outfile {output}"
 
 rule aggregate_summary:
     input:

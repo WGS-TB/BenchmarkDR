@@ -15,6 +15,7 @@ CrossValidation:
   n_jobs: 8
   return_train_score: True
   verbose: 2
+  # n_iter: 50 # Uncomment if using RandomizedSearchCV
 
 Models:
   LR_l1:
@@ -60,7 +61,6 @@ Models:
     model: LinearSVC
     params:
       penalty: 'l1'
-      dual: False
       class_weight: 'balanced'
     cv:
       max_iter: np.logspace(1, 5, base=10, num=5)

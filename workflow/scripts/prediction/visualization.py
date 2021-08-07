@@ -93,11 +93,11 @@ for path, currentDirectory, files in os.walk("/mnt/c/Users/Fernando/Documents/Pr
             df_tmp.insert(1, "Drug", file_split[1])
             df = pd.concat([df, df_tmp])
 
-df['param_C_log'] = np.log10(df['param_C'])
-df['param_max_iter_log'] = np.log10(df['param_max_iter'])
-dfg = pd.DataFrame({'param_solver':df['param_solver'].unique()})
-dfg['param_solver_ind'] = dfg.index
-df = pd.merge(df, dfg, on = 'param_solver', how='left')
+# df['param_C_log'] = np.log10(df['param_C'])
+# df['param_max_iter_log'] = np.log10(df['param_max_iter'])
+# dfg = pd.DataFrame({'param_solver':df['param_solver'].unique()})
+# dfg['param_solver_ind'] = dfg.index
+# df = pd.merge(df, dfg, on = 'param_solver', how='left')
 
 # Bootstrap themes by Ann: https://hellodash.pythonanywhere.com/theme_explorer
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.LUX, dbc.themes.DARKLY,'https://codepen.io/chriddyp/pen/bWLwgP.css'],
@@ -269,7 +269,8 @@ app.layout = html.Div([
 )
 def display_performance_summary(metric):
     dfc = summary.copy()
-    fig = px.scatter(dfc, x=metric, y="Drug", color="Model")
+    fig = px.scatter(dfc, x=metric, y="Drug", color="Model",
+             color_discrete_sequence=px.colors.qualitative.Light24)
     fig.update_layout(template="plotly_dark",
                     plot_bgcolor= 'rgba(0, 0, 0, 0)',
                     paper_bgcolor= 'rgba(0, 0, 0, 0)')
@@ -403,14 +404,14 @@ def update_hyperparameter_viz(data, metrics):
 
     # dlist.append(dict(range = [0,1], label = 'Balanced accuracy', values = dfc['mean_test_balanced_accuracy']))
     # dlist.append(dict(label = 'Time', values = dfc['mean_fit_time']))
-
     fig = go.Figure(data=
         go.Parcoords(
             labelfont = dict(size = 13),
             rangefont = dict(size = 12),
             tickfont = dict(size = 12),
             dimensions = dlist,
-            # line = dict(color = 'grey'),
+            line = dict(color = dfc['mean_test_roc_auc'],
+                      colorscale = 'Thermal'),
             line_colorbar = dict(thickness = 12),
             legendgrouptitle_font=dict(color = 'grey')
         )
@@ -585,12 +586,13 @@ def update_plot_diagnostics(data, train_test, y_val, x_val, group):
 @app.callback(
     Output('cv-res', 'figure'),
     Input('table-data', 'data'),
+    Input('slct-train-test', 'value'),
     Input('slct-y-axis', 'value')
 )
-def update_plot_cv_res(data, y_val):
+def update_plot_cv_res(data, train_test, y_val):
     dfc = pd.DataFrame.from_dict(data)
 
-    plot_data = dfc.filter(regex=("params|split\d+_"+"test"+"_"+y_val))
+    plot_data = dfc.filter(regex=("params|split\d+_"+train_test+"_"+y_val))
     
     fig = go.Figure()
     y = plot_data.drop(columns = 'params')

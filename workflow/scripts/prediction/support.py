@@ -2,6 +2,8 @@ import utils
 import pandas as pd
 import numpy as np
 from joblib import (load, dump)
+from scipy.stats import loguniform
+import ingot
 
 def CVFolds(config_file):
     module = utils.my_import(config_file['SplitterClass']['module'])

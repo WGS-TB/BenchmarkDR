@@ -1,18 +1,19 @@
 #PATH_DATA: "/mnt/c/Users/Fernando/Documents/Project_2/Pipeline_dataset"
 PATH_DATA: "/rds/general/user/fg520/home/Project2/pipeline_dataset" # specifiy path to folder where data is stored (only folder name, no / afterwards)
 
-#BACTERIA: ["test_bacterium"]
-BACTERIA: ["mtb"]
+BACTERIA: ["e_coli"]
 
 #OUTPUT_DIR: "/mnt/c/Users/Fernando/Documents/Project_2/output"
 OUTPUT_DIR: "/rds/general/user/fg520/home/Project2/output"
 
 REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
 
-# LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
+#TODO LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
 
-DRUGS: ["amikacin", "capreomycin", "ciprofloxacin", "ethambutol", "ethionamide", "isoniazid", "kanamycin", "moxifloxacin", "ofloxacin", "pyrazinamide", "rifampicin", "streptomycin"]
+DRUGS: ["AMC", "AMP", "AMX", "CET", "CIP", "CTX", "CTZ", "CXM", "GEN", "TBM", "TMP", "TZP"]
+# "AMC", "AMP", "AMX", "CET", "CIP", "CTX", "CTZ", "CXM", "GEN", "TBM", "TMP", "TZP"
 
-METHODS: ["LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "SVM_l1", "KNN"]
+METHODS: ["INGOT"]
+# "LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "SVM_l1", "KNN", "LR_l1", "LR_l2", "SVM_l2", "GNB", "CNB"
 
-OPTIMIZATION: GridSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
+OPTIMIZATION: "GridSearchCV" # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
