@@ -1,13 +1,12 @@
-#PATH_DATA: "/mnt/c/Users/Fernando/Documents/Project_2/Pipeline_dataset"
 PATH_DATA: "/rds/general/user/fg520/home/Project2/pipeline_dataset" # specifiy path to folder where data is stored (only folder name, no / afterwards)
 
-#BACTERIA: ["test_bacterium"]
-BACTERIA: ["mtb"]
+BACTERIA: ["e_coli"]
 
-#OUTPUT_DIR: "/mnt/c/Users/Fernando/Documents/Project_2/output"
-OUTPUT_DIR: "/rds/general/user/fg520/home/Project2/output"
+OUTPUT_DIR: "/rds/general/user/ns1920/projects/bacterial_datasets/ephemeral/pipeline_output"
 
-REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
+REPRESENTATION: ["snps", "gene_presence_absence"] # 'snps', 'gene_presence_absence'
+
+OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
 
 # LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
 
