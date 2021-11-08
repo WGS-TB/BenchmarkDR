@@ -1,4 +1,4 @@
-PATH_DATA: "/rds/general/user/ns1920/projects/bacterial_datasets/live/pipeline_data" # specifiy path to folder where data is stored (only folder name, no / afterwards)
+PATH_DATA: "/rds/general/user/fg520/home/Project2/pipeline_dataset" # specifiy path to folder where data is stored (only folder name, no / afterwards)
 
 BACTERIA: ["e_coli"]
 
@@ -10,6 +10,8 @@ OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesS
 
 # LABEL_TYPE: Susceptibility # 'Susceptibility' or 'MIC'
 
-METHODS: ["LR_l1", "LR_l2", "SVM_l1"]
+DRUGS: ["amikacin", "capreomycin", "ciprofloxacin", "ethambutol", "ethionamide", "isoniazid", "kanamycin", "moxifloxacin", "ofloxacin", "pyrazinamide", "rifampicin", "streptomycin"]
+
+METHODS: ["LR_l1", "LR_l2", "LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "GNB", "CNB", "SVM_l1", "SVM_l2", "KNN"]
 
 OPTIMIZATION: GridSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
