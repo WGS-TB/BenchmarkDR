@@ -17,6 +17,9 @@ CrossValidation:
   verbose: 2
 
 Models:
+
+# Classification (Resistant/ Susceptible)
+
   LR_l1:
     module: sklearn.linear_model
     model: LogisticRegression
@@ -134,7 +137,7 @@ Models:
       min_samples_split: [2, 5, 10, 15]
       max_depth: [5, 10, 15, 30]
 
-  SGD_l1:
+  SGDC_l1:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
@@ -146,7 +149,7 @@ Models:
       loss: ['hinge', 'log']
       alpha: np.logspace(-4, 0, base=10, num=5)
 
-  SGD_l2:
+  SGDC_l2:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
@@ -158,7 +161,7 @@ Models:
       loss: ['hinge', 'log']
       alpha: np.logspace(-4, 0, base=10, num=5)
     
-  SGD_elasticnet:
+  SGDC_elasticnet:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
@@ -214,7 +217,73 @@ Models:
       lambda_p: [0.01, 0.1, 1, 10, 100]
       lambda_z: [0.01, 0.1, 1, 10, 100]
 
-ModelRegressors:
+# Regression (Minimum Inhibitory Concentration)
+
   ADB:
     module: sklearn.ensemble
     model: AdaBoostRegressor
+
+  LR:
+    module: sklearn.linear_model
+    model: LinearRegression
+    params:
+      normalize: False
+
+  LR_l1:
+    module: sklearn.linear_model
+    model: Lasso
+    params:
+      alpha: 1.0
+    cv:
+      alpha: [0.5, 1, 2]   
+
+  LR_l2:
+    module: sklearn.linear_model
+    model: Ridge
+    params:
+      alpha: 1.0
+    cv:
+      alpha: [0.5, 1, 2]
+
+  LR_elasticnet:
+    module: sklearn.linear_model
+    model: ElasticNet
+    params:
+      alpha: 1.0
+    cv:
+      alpha: [0.5, 1, 2]
+      l1_ratio: [0.25, 0.5, 0.75]
+
+  SVMR:
+    module: sklearn.svm
+    model: SVR
+    params:
+      penalty: 'l1'
+      dual: False
+    cv:
+      max_iter: np.logspace(1, 5, base=10, num=5)
+      loss: ['squared_hinge']
+      C: np.logspace(-4, 4, base=10, num=5)
+  
+#How to structure this?
+  SGDR_l1:
+    module: sklearn.linear_model
+    model: SGDRegressor
+    params:
+      penalty: ['l1']
+      n_jobs: -1
+      max_iter: 1000
+    cv:   
+      loss: ['hinge', 'log']
+      alpha: np.logspace(-4, 0, base=10, num=5)
+
+
+
+
+
+
+
+
+
+
+
