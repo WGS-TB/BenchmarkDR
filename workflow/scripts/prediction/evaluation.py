@@ -5,56 +5,31 @@ import pandas as pd
 import utils
 import os
 
+data_file = snakemake.input["data"]
+labels_file = snakemake.input["label"]
+model= snakemake.input["model"]
+method = snakemake.wildcards.method
+method_config_file = snakemake.input["conf"]
+
+mode = snakemake.config["MODE"]
+optimization = snakemake.config["OPTIMIZATION"]
+
+output_file = str(snakemake.output)
+
 def main():
     from sklearn.model_selection import train_test_split
     from skopt import BayesSearchCV
     from support import (preprocess, model_fitting, evaluate_classifier, evaluate_regression)
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '--data', dest='datafile', metavar='FILE',
-        help='Path to the data file', required=True,
-    )
-    parser.add_argument(
-        '--label', dest='labelfile', metavar='FILE',
-        help='Path to the label file', required=True,
-    )
-    parser.add_argument(
-        '--config', dest='config', metavar='FILE',
-        help='Path to the config file', required=True,
-    )
-    parser.add_argument(
-        '--model', dest='modelname',
-        help='Name of model', required=True
-    )
-    parser.add_argument(
-        '--modelfile', dest='modelfile',metavar='FILE',
-        help='Path to the model file', required=True
-    )
-    parser.add_argument(
-        '--optimize', dest='optimization',
-        help='Name of optimization method', required=True,
-    )
-    parser.add_argument(
-        '--outfile', dest='outfile',
-        help='Name of output file', required=True
-    )
-    parser.add_argument(
-        '--mode', dest='mode',
-        help='Mode of Labels', required=True
-    )
+    data, labels = preprocess(data = data_file, label = labels_file)
+    config_file = utils.config_reader(method_config_file)
 
-    args = parser.parse_args()
-
-    data, labels = preprocess(data = args.datafile, label = args.labelfile)
-    config_file = utils.config_reader(args.config)
-
-    print("Data file = ", data)
-    print("Mode = ", args.mode)
-    print("Label file = ", labels)
-    print("Model = ", args.modelname)
-    print("Config file = ", config_file)
-    print("Optimization = ", args.optimization)
+    print("Data file = ", data_file)
+    print("Mode = ", mode)
+    print("Label file = ", labels_file)
+    print("Method = ", method)
+    print("Config file = ", method_config_file)
+    print("Optimization = ", optimization)
     print("_______________________________")
 
     
@@ -84,7 +59,7 @@ def main():
 
         print('Fitting training data')
         start_time = time.time()
-        clf = model_fitting(args, drug, X_train, y_train, config_file)
+        clf = model_fitting(drug, X_train, y_train, method, model, optimization, config_file, output_file)
         end_time = time.time()
         print("_______________________________")
 
@@ -94,18 +69,19 @@ def main():
 
         print('Evaluating')
 
-        if args.mode == "Classification":
+        if mode == "Classification":
           result = evaluate_classifier(y_test, y_pred)
         
-        if args.mode == "MIC":
+        if mode == "MIC":
           result = evaluate_regression(y_test, y_pred)
 
-        result.insert(0, "Drug", drug)
-        result.insert(1, "Time", end_time-start_time)
+        result.insert(0, "Method", method)
+        result.insert(1, "Drug", drug)
+        result.insert(2, "Time", end_time-start_time)
         results = results.append(result)
         print("_______________________________")
 
-    print('Saving results to {0}'.format(args.outfile))
-    results.to_csv(args.outfile, index =False)
+    print('Saving results to {0}'.format(output_file))
+    results.to_csv(output_file, index =False)
             
 main()

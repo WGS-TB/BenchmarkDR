@@ -29,20 +29,20 @@ def preprocess(data, label):
 
     return(data, labels)
 
-def model_fitting(args, drug, X_train, y_train, config_file):
+def model_fitting(drug, X_train, y_train, method, model, optimization, config_file, output_file):
     from sklearn.model_selection import (GridSearchCV, RandomizedSearchCV)
     from sklearn.metrics import(balanced_accuracy_score, make_scorer, f1_score, roc_auc_score)
     
-    print("Loading ", args.modelfile)
-    model = load(args.modelfile)
-    modelname = args.modelname
+    print("Loading ", model)
+    model = load(model)
+    modelname = method
 
     scoring = dict(Accuracy='accuracy', tp=make_scorer(utils.tp), tn=make_scorer(utils.tn),
                 fp=make_scorer(utils.fp), fn=make_scorer(utils.fn),
                 balanced_accuracy=make_scorer(balanced_accuracy_score), f1score=make_scorer(f1_score),
                 roc_auc=make_scorer(roc_auc_score))
 
-    if args.optimization != "None" :
+    if optimization != "None" :
         print('Hyper-parameter Tuning')
         param_grid = config_file['Models'][modelname]['cv']
         for key, value in param_grid.items():
@@ -52,11 +52,11 @@ def model_fitting(args, drug, X_train, y_train, config_file):
         print(param_grid)
         for i in config_file['CrossValidation'].items(): print('{}: {}'.format(i[0], i[1]))
 
-        if args.optimization == "GridSearchCV":
+        if aoptimization == "GridSearchCV":
             grid = GridSearchCV(estimator=model, param_grid=param_grid,
                         scoring=scoring, cv=CVFolds(config_file), **config_file['CrossValidation'])
 
-        elif args.optimization == "RandomizedSearchCV":
+        elif optimization == "RandomizedSearchCV":
             grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
                         scoring=scoring, cv=CVFolds(config_file), **config_file['CrossValidation'])
 
@@ -64,12 +64,12 @@ def model_fitting(args, drug, X_train, y_train, config_file):
         grid.fit(X_train, y_train)
         print('Best params: {}'.format(grid.best_params_))
 
-        filename = args.modelfile
+        filename = model
         filename = filename.replace(".joblib", "_grid.joblib")
         print('Saving grid model to {0}'.format(filename))
         dump(grid, filename)
 
-        filename = args.outfile
+        filename = output_file
         filename = filename.replace(".csv", "_cv.csv")
         print('Saving cv results to {0}'.format(filename))
         cv_results = pd.DataFrame(grid.cv_results_)
@@ -78,7 +78,7 @@ def model_fitting(args, drug, X_train, y_train, config_file):
 
         return grid
 
-    elif args.optimization == "None" :
+    elif optimization == "None" :
         print('Not running hyper-parameter tuning')
         clf = model.fit(X_train, y_train)
         print("_______________________________")
@@ -103,7 +103,7 @@ def evaluate_classifier(y_test, y_pred):
     return result
 
 def evaluate_regression(y_test, y_pred):
-    from sklearn.metrics import mean_squared_error
+    from sklearn.metrics import (mean_squared_error, r2_score)
 
     mse = mean_squared_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)

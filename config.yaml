@@ -6,7 +6,7 @@ OUTPUT_DIR: "/rds/general/user/ns1920/projects/bacterial_datasets/ephemeral/pipe
 
 REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
 
-MODE: ["MIC"] # "Classification"
+MODE: "MIC" # "Classification"
 
 DRUGS: ["amikacin"]
 
