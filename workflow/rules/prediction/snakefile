@@ -15,11 +15,12 @@ rule build_model:
 
 rule evaluation:
     input:
-        data=str(path_data + "{bacterium}/data/gene_data_full.csv"),
-        label=str(path_data + "{bacterium}/data/label_{drug}.csv"),
+        data=str(path_data + "{bacterium}/representation/gene_presence_absence/0_matrix.csv"),
+        label=str(path_data + "{bacterium}/label_{drug}.csv"),
         model=output_dir + "{bacterium}/prediction/models/{method}.joblib",
         conf="workflow/rules/prediction/models_conf.yml"
     params:
+        mode = config["MODE"],
         cv=config["OPTIMIZATION"]
     output:
         str(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv")
@@ -27,7 +28,7 @@ rule evaluation:
         "../../envs/prediction/env.yml"
     threads: 8
     shell:
-        "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --config {input.conf} --model {wildcards.method} --modelfile {input.model} --optimize {params.cv} --outfile {output}"
+        "python workflow/scripts/prediction/evaluation.py --data {input.data} --label {input.label} --mode {params.mode} --config {input.conf} --model {wildcards.method} --modelfile {input.model} --optimize {params.cv} --outfile {output}"
 
 rule aggregate_summary:
     input:

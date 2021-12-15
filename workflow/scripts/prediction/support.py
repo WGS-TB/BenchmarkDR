@@ -85,7 +85,7 @@ def model_fitting(args, drug, X_train, y_train, config_file):
 
         return clf
 
-def evaluate(y_test, y_pred):
+def evaluate_classifier(y_test, y_pred):
     from sklearn.metrics import(accuracy_score, balanced_accuracy_score, roc_auc_score, confusion_matrix, f1_score)
 
     accuracy = accuracy_score(y_test, y_pred)
@@ -100,4 +100,15 @@ def evaluate(y_test, y_pred):
         sensitivity = sensitivity, specificity = specificity)
     result = pd.DataFrame([result])
 
+    return result
+
+def evaluate_regression(y_test, y_pred):
+    from sklearn.metrics import mean_squared_error
+
+    mse = mean_squared_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    result = dict(mean_squared_error = mse, r2_score = r2)
+    result = pd.DataFrame([result])
+    
     return result

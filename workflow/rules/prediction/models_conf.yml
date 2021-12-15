@@ -1,6 +1,6 @@
 TrainTestSplit:
   random_state: &seed 33
-  test_size: 0.1
+  test_size: 0.5
   shuffle: True
 
 SplitterClass:
@@ -219,17 +219,13 @@ Models:
 
 # Regression (Minimum Inhibitory Concentration)
 
-  ADB:
-    module: sklearn.ensemble
-    model: AdaBoostRegressor
-
-  LR:
+  LinR:
     module: sklearn.linear_model
     model: LinearRegression
     params:
       normalize: False
 
-  LR_l1:
+  LinR_l1:
     module: sklearn.linear_model
     model: Lasso
     params:
@@ -237,7 +233,7 @@ Models:
     cv:
       alpha: [0.5, 1, 2]   
 
-  LR_l2:
+  LinR_l2:
     module: sklearn.linear_model
     model: Ridge
     params:
@@ -245,7 +241,7 @@ Models:
     cv:
       alpha: [0.5, 1, 2]
 
-  LR_elasticnet:
+  LinR_elasticnet:
     module: sklearn.linear_model
     model: ElasticNet
     params:
@@ -258,11 +254,9 @@ Models:
     module: sklearn.svm
     model: SVR
     params:
-      penalty: 'l1'
-      dual: False
+      kernel: 'rbf'
     cv:
       max_iter: np.logspace(1, 5, base=10, num=5)
-      loss: ['squared_hinge']
       C: np.logspace(-4, 4, base=10, num=5)
   
 #How to structure this?

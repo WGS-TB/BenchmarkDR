@@ -8,7 +8,7 @@ import os
 def main():
     from sklearn.model_selection import train_test_split
     from skopt import BayesSearchCV
-    from support import (preprocess, model_fitting, evaluate)
+    from support import (preprocess, model_fitting, evaluate_classifier, evaluate_regression)
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -39,17 +39,23 @@ def main():
         '--outfile', dest='outfile',
         help='Name of output file', required=True
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        '--mode', dest='mode',
+        help='Mode of Labels', required=True
+    )
 
-    print("Data file = ", args.datafile)
-    print("Label file = ", args.labelfile)
-    print("Model = ", args.modelname)
-    print("Config file = ", args.config)
-    print("Optimization = ", args.optimization)
-    print("_______________________________")
+    args = parser.parse_args()
 
     data, labels = preprocess(data = args.datafile, label = args.labelfile)
     config_file = utils.config_reader(args.config)
+
+    print("Data file = ", data)
+    print("Mode = ", args.mode)
+    print("Label file = ", labels)
+    print("Model = ", args.modelname)
+    print("Config file = ", config_file)
+    print("Optimization = ", args.optimization)
+    print("_______________________________")
 
     
     results=pd.DataFrame()
@@ -87,7 +93,13 @@ def main():
         print("_______________________________")
 
         print('Evaluating')
-        result = evaluate(y_test, y_pred)
+
+        if args.mode == "Classification":
+          result = evaluate_classifier(y_test, y_pred)
+        
+        if args.mode == "MIC":
+          result = evaluate_regression(y_test, y_pred)
+
         result.insert(0, "Drug", drug)
         result.insert(1, "Time", end_time-start_time)
         results = results.append(result)

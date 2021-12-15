@@ -35,7 +35,7 @@ REFERENCE_IDS = {}
 
 for bacterium in BACTERIA:
 
-    path_label_file = path_data  + "/" + bacterium + "/" + "AllLabels.csv"
+    path_label_file = path_data + bacterium + "/" + "AllLabels.csv"
     labels_df = pd.read_csv(path_label_file)
     STRAINS_IDS[bacterium] = list(labels_df["id"])
 

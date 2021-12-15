@@ -1,15 +1,15 @@
-PATH_DATA: "/rds/general/user/fg520/home/Project2/pipeline_dataset" # specifiy path to folder where data is stored (only folder name, no / afterwards)
+PATH_DATA: "/rds/general/user/ns1920/projects/bacterial_datasets/live/pipeline_data" # specifiy path to folder where data is stored (only folder name, no / afterwards)
 
-BACTERIA: ["e_coli"]
+BACTERIA: ["test_bacterium"]
 
-OUTPUT_DIR: "/rds/general/user/ns1920/projects/bacterial_datasets/ephemeral/pipeline_output"
+OUTPUT_DIR: "/rds/general/user/ns1920/projects/bacterial_datasets/ephemeral/pipeline_output/test_bacterium"
 
-REPRESENTATION: ["snps", "gene_presence_absence"] # 'snps', 'gene_presence_absence'
+REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
 
-OPTIMIZATION: RandomizedSearchCV # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
+MODE: ["MIC"] # "Classification"
 
-DRUGS: ["amikacin", "capreomycin", "ciprofloxacin", "ethambutol", "ethionamide", "isoniazid", "kanamycin", "moxifloxacin", "ofloxacin", "pyrazinamide", "rifampicin", "streptomycin"]
+DRUGS: ["amikacin"]
 
-METHODS: ["LR_l1", "LR_l2", "LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "GNB", "CNB", "SVM_l1", "SVM_l2", "KNN"]
+METHODS: ["LinR", "LinR_l1", "LinR_l2", "LinR_elasticnet", "SVMR"] #Classification ["LR_l1", "LR_l2", "LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "GNB", "CNB", "SVM_l1", "SVM_l2", "KNN"]
 
-OPTIMIZATION: none # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
+OPTIMIZATION: 'None' # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
