@@ -2,7 +2,7 @@ PATH_DATA: "/rds/general/user/ns1920/projects/bacterial_datasets/live/pipeline_d
 
 BACTERIA: ["test_bacterium"]
 
-OUTPUT_DIR: "/rds/general/user/ns1920/projects/bacterial_datasets/ephemeral/pipeline_output/test_bacterium"
+OUTPUT_DIR: "/rds/general/user/ns1920/projects/bacterial_datasets/ephemeral/pipeline_output"
 
 REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
 

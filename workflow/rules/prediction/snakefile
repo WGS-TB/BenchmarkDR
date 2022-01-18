@@ -19,9 +19,11 @@ rule build_model:
 rule evaluation:
     input:
         data=path_data + "{bacterium}/representation/gene_presence_absence/0_matrix.csv",
-        label=path_data + "{bacterium}/label_{drug}.csv",
+        label=path_data + "{bacterium}/AllLabels.csv",
         model=output_dir + "{bacterium}/prediction/models/{method}.joblib",
         conf="workflow/rules/prediction/models_config.yml"
+    params: 
+        drug = "{drug}"
     output:
         output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv"
     conda:

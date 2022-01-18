@@ -11,6 +11,8 @@ model= snakemake.input["model"]
 method = snakemake.wildcards.method
 method_config_file = snakemake.input["conf"]
 
+drug = snakemake.params["drug"]
+
 mode = snakemake.config["MODE"]
 optimization = snakemake.config["OPTIMIZATION"]
 
@@ -35,51 +37,50 @@ def main():
     
     results=pd.DataFrame()
 
-    for drug in labels.columns:
-        print('Analysing {0}'.format(drug))
+    print('Analysing {0}'.format(drug))
 
-        y = np.ravel(labels[[drug]])
-        na_index = np.isnan(y)
-        y = y[~na_index]
+    y = np.ravel(labels[[drug]])
+    na_index = np.isnan(y)
+    y = y[~na_index]
 
-        X = data
-        X = X.loc[~na_index,:]
+    X = data
+    X = X.loc[~na_index,:]
 
-        print('Data shape: {}'.format(X.shape))
-        print('Label shape: {}'.format(y.shape))
-        print("_______________________________")
+    print('Data shape: {}'.format(X.shape))
+    print('Label shape: {}'.format(y.shape))
+    print("_______________________________")
 
-        print('Train-Test split')
-        X_train, X_test, y_train, y_test = train_test_split(X, y, **config_file['TrainTestSplit'])
-        print('Train data shape: {}'.format(X_train.shape))
-        print('Train label shape: {}'.format(y_train.shape))
-        print('Test data shape: {}'.format(X_test.shape))
-        print('Test label shape: {}'.format(y_test.shape))
-        print("_______________________________")
+    print('Train-Test split')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, **config_file['TrainTestSplit'])
+    print('Train data shape: {}'.format(X_train.shape))
+    print('Train label shape: {}'.format(y_train.shape))
+    print('Test data shape: {}'.format(X_test.shape))
+    print('Test label shape: {}'.format(y_test.shape))
+    print("_______________________________")
 
-        print('Fitting training data')
-        start_time = time.time()
-        clf = model_fitting(drug, X_train, y_train, method, model, optimization, config_file, output_file)
-        end_time = time.time()
-        print("_______________________________")
+    print('Fitting training data')
+    start_time = time.time()
+    clf = model_fitting(drug, X_train, y_train, method, model, optimization, config_file, output_file)
+    end_time = time.time()
+    print("_______________________________")
 
-        print('Testing')
-        y_pred = clf.predict(X_test)
-        print("_______________________________")
+    print('Testing')
+    y_pred = clf.predict(X_test)
+    print("_______________________________")
 
-        print('Evaluating')
+    print('Evaluating')
 
-        if mode == "Classification":
-          result = evaluate_classifier(y_test, y_pred)
-        
-        if mode == "MIC":
-          result = evaluate_regression(y_test, y_pred)
+    if mode == "Classification":
+      result = evaluate_classifier(y_test, y_pred)
+    
+    if mode == "MIC":
+      result = evaluate_regression(y_test, y_pred)
 
-        result.insert(0, "Method", method)
-        result.insert(1, "Drug", drug)
-        result.insert(2, "Time", end_time-start_time)
-        results = results.append(result)
-        print("_______________________________")
+    result.insert(0, "Method", method)
+    result.insert(1, "Drug", drug)
+    result.insert(2, "Time", end_time-start_time)
+    results = results.append(result)
+    print("_______________________________")
 
     print('Saving results to {0}'.format(output_file))
     results.to_csv(output_file, index =False)
