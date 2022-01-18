@@ -60,7 +60,7 @@ def main():
 
     print('Fitting training data')
     start_time = time.time()
-    clf = model_fitting(drug, X_train, y_train, method, model, optimization, config_file, output_file)
+    clf, best_parameters = model_fitting(drug, X_train, y_train, method, model, optimization, config_file, output_file)
     end_time = time.time()
     print("_______________________________")
 
@@ -77,8 +77,9 @@ def main():
       result = evaluate_regression(y_test, y_pred)
 
     result.insert(0, "Method", method)
-    result.insert(1, "Drug", drug)
-    result.insert(2, "Time", end_time-start_time)
+    result.insert(1, "Parameters", best_parameters)
+    result.insert(2, "Drug", drug)
+    result.insert(3, "Time", end_time-start_time)
     results = results.append(result)
     print("_______________________________")
 

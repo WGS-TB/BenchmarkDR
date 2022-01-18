@@ -52,7 +52,7 @@ def model_fitting(drug, X_train, y_train, method, model, optimization, config_fi
         print(param_grid)
         for i in config_file['CrossValidation'].items(): print('{}: {}'.format(i[0], i[1]))
 
-        if aoptimization == "GridSearchCV":
+        if optimization == "GridSearchCV":
             grid = GridSearchCV(estimator=model, param_grid=param_grid,
                         scoring=scoring, cv=CVFolds(config_file), **config_file['CrossValidation'])
 
@@ -76,14 +76,14 @@ def model_fitting(drug, X_train, y_train, method, model, optimization, config_fi
         cv_results.to_csv(filename, index=False)
         print("_______________________________")
 
-        return grid
+        return grid, str(grid.best_params_)
 
     elif optimization == "None" :
         print('Not running hyper-parameter tuning')
         clf = model.fit(X_train, y_train)
         print("_______________________________")
 
-        return clf
+        return clf, str(model.get_params())
 
 def evaluate_classifier(y_test, y_pred):
     from sklearn.metrics import(accuracy_score, balanced_accuracy_score, roc_auc_score, confusion_matrix, f1_score)

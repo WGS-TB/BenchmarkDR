@@ -6,19 +6,15 @@ import re
 input_files = snakemake.input
 output_file = str(snakemake.output)
 
-config = snakemake.params["conf"]
-print(config)
+def main():
+    summary = pd.DataFrame()
 
-
-# def main():
-#     summary = pd.DataFrame()
-
-#     for file in input_files:
-#         df = pd.read_csv(file)
-#         summary = pd.concat([summary, df], axis=0)
+    for file in input_files:
+        df = pd.read_csv(file)
+        summary = pd.concat([summary, df], axis=0)
     
-#     print(summary)
-#     print("Saving summary to ", output_file)
-#     summary.to_csv(output_file, index=False)
+    print(summary)
+    print("Saving summary to ", output_file)
+    summary.to_csv(output_file, index=False)
 
-# main()
+main()

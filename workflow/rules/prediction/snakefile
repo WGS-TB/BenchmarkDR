@@ -37,7 +37,7 @@ rule aggregate_summary:
         expand(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv",
             method=global_config["METHODS"], drug=global_config["DRUGS"], allow_missing=True)
     params:
-        conf= config
+        config = config
     output:
         output_dir + "{bacterium}/prediction/summary.csv"
     script:
