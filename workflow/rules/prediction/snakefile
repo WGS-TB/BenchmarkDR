@@ -1,46 +1,58 @@
 configfile: "workflow/rules/prediction/models_config.yml"
 
+
 with open("config.yaml") as file:
     global_config = yaml.load(file, yaml.FullLoader)
 
 path_data = global_config["PATH_DATA"] + "/"
 output_dir = global_config["OUTPUT_DIR"] + "/"
 
+
 rule build_model:
     input:
-        conf="workflow/rules/prediction/models_config.yml"
+        conf="workflow/rules/prediction/models_config.yml",
     output:
-        output_dir + "{bacterium}/prediction/models/{method}.joblib"
+        output_dir + "{bacterium}/prediction/models/{method}.joblib",
     conda:
         "../../envs/prediction/env.yml"
     shell:
         "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {wildcards.method} --outfile {output}"
 
+
 rule evaluation:
     input:
-        data=path_data + "{bacterium}/representation/gene_presence_absence/0_matrix.csv",
+        data=output_dir + "{bacterium}/representation/{representation}/0_matrix.csv",
         label=path_data + "{bacterium}/AllLabels.csv",
         model=output_dir + "{bacterium}/prediction/models/{method}.joblib",
-        conf="workflow/rules/prediction/models_config.yml"
-    params: 
-        drug = "{drug}"
+        conf="workflow/rules/prediction/models_config.yml",
+    params:
+        drug="{drug}",
     output:
-        output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv"
+        output_dir
+        + "{bacterium}/prediction/results/{representation}/{method}-{drug}.csv",
     conda:
         "../../envs/prediction/env.yml"
     threads: 8
     script:
         "../../scripts/prediction/evaluation.py"
 
+
 rule aggregate_summary:
     input:
-        expand(output_dir + "{bacterium}/prediction/results/{method}-{drug}.csv",
-            method=global_config["METHODS"], drug=global_config["DRUGS"], allow_missing=True)
+        expand(
+            output_dir
+            + "{bacterium}/prediction/results/{representation}/{method}-{drug}.csv",
+            representation=global_config["REPRESENTATION"],
+            method=global_config["METHODS"],
+            drug=global_config["DRUGS"],
+            allow_missing=True,
+        ),
     params:
-        config = config
+        config=config,
     output:
-        output_dir + "{bacterium}/prediction/summary.csv"
+        output_dir + "{bacterium}/prediction/summary.csv",
     script:
         "../../scripts/prediction/aggregate.py"
-    
+
+
 # TODO rule visual_report:
