@@ -1,4 +1,3 @@
-
 import pandas as pd
 
 file_list = snakemake.input

@@ -22,11 +22,11 @@ def config_decoder(config_inpt):
     for keys, vals in config_inpt.items():
         if isinstance(vals, dict):
             # print(vals)
-            if 'mode' in config_inpt[keys].keys():
-                if config_inpt[keys]['mode'] == 'range':
-                    config_inpt[keys] = np.arange(*config_inpt[keys]['values'])
-                elif config_inpt[keys]['mode'] == 'list':
-                    config_inpt[keys] = config_inpt[keys]['values']
+            if "mode" in config_inpt[keys].keys():
+                if config_inpt[keys]["mode"] == "range":
+                    config_inpt[keys] = np.arange(*config_inpt[keys]["values"])
+                elif config_inpt[keys]["mode"] == "list":
+                    config_inpt[keys] = config_inpt[keys]["values"]
             else:
                 config_decoder(config_inpt[keys])
         else:
@@ -44,7 +44,7 @@ def config_reader(config_file_name):
     """
     try:
         # Read config file
-        with open(config_file_name, 'r') as config_file:
+        with open(config_file_name, "r") as config_file:
             config_dict = yaml.load(config_file, Loader=yaml.FullLoader)
         return config_decoder(config_dict)
 
@@ -88,7 +88,7 @@ def report_file_path(report_path, report_label, report_extension):
     Return:
         report_path: Path to the report file.
     """
-    report_path = report_path + '/{}.{}'.format(report_label, report_extension)
+    report_path = report_path + "/{}.{}".format(report_label, report_extension)
     return report_path
 
 
@@ -134,7 +134,7 @@ def result_path_generator(args):
             print("Successfully created the directory %s " % result_path)
     # Copy config file
     if os.path.isfile(args.config):
-        copyfile(args.config, os.path.join(result_path, 'config.yml'))
+        copyfile(args.config, os.path.join(result_path, "config.yml"))
     return current_path, result_path
 
 
@@ -168,11 +168,18 @@ def param_distributor(param_dictionary, function_name):
         passing_param (dict): Dictionary of parameter which is passing to the function.
         remaining_param (dict): Dictionary of parameter which is NOT passing to the function.
     """
-    passing_param = {k: param_dictionary[k] for k in inspect.signature(function_name).parameters if
-                     k in param_dictionary}
-    remaining_param = {k: inspect.signature(function_name).parameters[k].default if
-    inspect.signature(function_name).parameters[k].default != inspect._empty else None for k in
-                       inspect.signature(function_name).parameters if k not in passing_param}
+    passing_param = {
+        k: param_dictionary[k]
+        for k in inspect.signature(function_name).parameters
+        if k in param_dictionary
+    }
+    remaining_param = {
+        k: inspect.signature(function_name).parameters[k].default
+        if inspect.signature(function_name).parameters[k].default != inspect._empty
+        else None
+        for k in inspect.signature(function_name).parameters
+        if k not in passing_param
+    }
     return passing_param, remaining_param
 
 
@@ -189,20 +196,26 @@ def shap_vals(model, X_train, X_test, shap_kernel):
         feature_importance (DataFrame): Sorted dataframe of features and their SHAP values.
     """
     import shap
-    if shap_kernel == 'TreeExplainer':
+
+    if shap_kernel == "TreeExplainer":
         shap_values = shap.TreeExplainer(model).shap_values(X_test)
         vals = np.abs(shap_values[1]).mean(0)
-    elif shap_kernel == 'LinearExplainer':
+    elif shap_kernel == "LinearExplainer":
         shap_values = shap.LinearExplainer(model, X_train).shap_values(X_test)
         vals = np.abs(shap_values).mean(0)
-    elif shap_kernel == 'KernelExplainer':
+    elif shap_kernel == "KernelExplainer":
         X_train_summary = shap.kmeans(X_test, 50)
-        shap_values = shap.KernelExplainer(model.predict_proba, X_train_summary, link="logit").shap_values(X_test,
-                                                                                                           nsamples=100)
+        shap_values = shap.KernelExplainer(
+            model.predict_proba, X_train_summary, link="logit"
+        ).shap_values(X_test, nsamples=100)
         vals = np.abs(shap_values[1]).mean(0)
-    feature_importance = pd.DataFrame(list(zip(X_train.columns, vals)),
-                                      columns=['col_name', 'feature_importance_vals'])
-    feature_importance.sort_values(by=['feature_importance_vals'], ascending=False, inplace=True)
+    feature_importance = pd.DataFrame(
+        list(zip(X_train.columns, vals)),
+        columns=["col_name", "feature_importance_vals"],
+    )
+    feature_importance.sort_values(
+        by=["feature_importance_vals"], ascending=False, inplace=True
+    )
     return feature_importance
 
 
@@ -268,8 +281,9 @@ def TNR(y_true, y_pred):
         Return:
             True Negative Rate.
     """
-    return confusion_matrix(y_true, y_pred)[0, 0] / (confusion_matrix(y_true, y_pred)[0, 0] +
-                                                     confusion_matrix(y_true, y_pred)[0, 1])
+    return confusion_matrix(y_true, y_pred)[0, 0] / (
+        confusion_matrix(y_true, y_pred)[0, 0] + confusion_matrix(y_true, y_pred)[0, 1]
+    )
 
 
 def my_import(name):
@@ -283,7 +297,7 @@ def my_import(name):
         Loaded module
     """
     mod = __import__(name)
-    components = name.split('.')
+    components = name.split(".")
     for comp in components[1:]:
         mod = getattr(mod, comp)
     return mod
@@ -293,8 +307,8 @@ def abs_path(file_path):
     return os.path.join(os.getcwd(), file_path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     """
     Main method for testing config_reader
     """
-    print(config_reader('machineLearningComparison/config.yml'))
+    print(config_reader("machineLearningComparison/config.yml"))

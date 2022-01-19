@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 
@@ -16,9 +15,9 @@ for file in file_list:
 
     # filter out SNPs detected as heterozygous, since likely wrong for haploid bacterial genome
     strain_data = strain_data.loc[strain_data["SamplesHom"] == 1]
-    
+
     strain_data.index = strain_data["Chrom"] + "_" + strain_data["Position"].astype(str)
-    strain_data[strain_id] =  np.ones(len(strain_data.index), dtype = np.int8)
+    strain_data[strain_id] = np.ones(len(strain_data.index), dtype=np.int8)
 
     matrix_df = matrix_df.append(strain_data[strain_id].T)
 
