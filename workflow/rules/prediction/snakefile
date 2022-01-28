@@ -39,12 +39,13 @@ rule evaluation:
 
 rule aggregate_summary:
     input:
-        expand(
+        lambda wildcards: expand(
             output_dir
             + "{bacterium}/prediction/results/{representation}/{method}-{drug}.csv",
             representation=global_config["REPRESENTATION"],
             method=global_config["METHODS"],
             drug=global_config["DRUGS"],
+            bacterium=wildcards.bacterium,
             allow_missing=True,
         ),
     params:

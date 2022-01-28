@@ -1,6 +1,3 @@
-from pathlib import Path
-
-
 configfile: "config.yaml"
 
 
@@ -21,6 +18,6 @@ include: "workflow/rules/prediction/snakefile"
 rule all:
     input:
         expand(
-            Path(config["OUTPUT_DIR"] + "/{bacterium}/prediction/summary.csv"),
+            config["OUTPUT_DIR"] + "/{bacterium}/prediction/summary.csv",
             bacterium=config["BACTERIA"],
-        ),
+        )
