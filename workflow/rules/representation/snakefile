@@ -42,14 +42,12 @@ for bacterium in BACTERIA:
     STRAINS_IDS[bacterium] = list(labels_df["id"])
 
     # reference genomes
-    file_reference_fna = glob.glob(path_data + bacterium + "/reference/*.fna")
-    if file_reference_fna:
-        REFERENCE_IDS[bacterium] = file_reference_fna[0]
-
+    file_reference = glob.glob(path_data + bacterium + "/reference/*.f*a")
+    if file_reference:
+        REFERENCE_IDS[bacterium] = file_reference[0]
+    
     else:
-        file_reference_fa = glob.glob(path_data + bacterium + "/reference/*.fa")
-        if file_reference_fa:
-            REFERENCE_IDS[bacterium] = file_reference_fa[0]
+        warnings.warn("Could not find reference genome of filetype .fa or .fna.") 
 
 
 ## Function to combine all single files for bacterium to combine in matrix
@@ -120,16 +118,11 @@ def count_bases_strain(path_strain):
 REFERENCE_BASE_COUNT = {}
 
 for bacterium in BACTERIA:
-
-    file_reference = glob.glob(path_data + bacterium + "/reference/*.f*a")
-    if file_reference_fna:
-        base_count = count_bases_reference(file_reference_fna[0])
-
-    else:
-        warnings.warn("Could not find reference genome of filetype .fa or .fna.")
-       
-
+    
+    file_reference = REFERENCE_IDS.get(bacterium)
+    base_count = count_bases_reference(file_reference)
     REFERENCE_BASE_COUNT[bacterium] = base_count
+         
 
 
 #############################
