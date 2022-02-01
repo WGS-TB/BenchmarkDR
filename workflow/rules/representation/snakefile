@@ -5,7 +5,7 @@ import os
 import yaml
 import itertools
 import pandas as pd
-
+import warnings
 
 configfile: "workflow/rules/representation/config.yml"
 
@@ -121,15 +121,13 @@ REFERENCE_BASE_COUNT = {}
 
 for bacterium in BACTERIA:
 
-    file_reference_fna = glob.glob(path_data + bacterium + "/reference/*.fna")
+    file_reference = glob.glob(path_data + bacterium + "/reference/*.f*a")
     if file_reference_fna:
         base_count = count_bases_reference(file_reference_fna[0])
 
     else:
-        file_reference_fa = glob.glob(path_data + bacterium + "/reference/*.fa")
-
-        if file_reference_fa:
-            base_count = count_bases_reference(file_reference_fa[0])
+        warnings.warn("Could not find reference genome of filetype .fa or .fna.")
+       
 
     REFERENCE_BASE_COUNT[bacterium] = base_count
 
