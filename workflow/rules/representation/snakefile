@@ -120,8 +120,9 @@ REFERENCE_BASE_COUNT = {}
 for bacterium in BACTERIA:
     
     file_reference = REFERENCE_IDS.get(bacterium)
-    base_count = count_bases_reference(file_reference)
-    REFERENCE_BASE_COUNT[bacterium] = base_count
+    if file_reference:
+       base_count = count_bases_reference(file_reference)
+       REFERENCE_BASE_COUNT[bacterium] = base_count
          
 
 
