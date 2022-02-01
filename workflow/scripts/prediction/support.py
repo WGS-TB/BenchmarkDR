@@ -33,7 +33,15 @@ def preprocess(data, label):
 
 
 def model_fitting(
-    drug, X_train, y_train, method, model, optimization, config_file, output_file
+    drug,
+    X_train,
+    y_train,
+    mode,
+    method,
+    model_joblib,
+    optimization,
+    config_file,
+    output_file,
 ):
     from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
     from sklearn.metrics import (
@@ -41,22 +49,31 @@ def model_fitting(
         make_scorer,
         f1_score,
         roc_auc_score,
+        mean_squared_error,
+        r2_score,
     )
 
-    print("Loading ", model)
-    model = load(model)
+    print("Loading ", model_joblib)
+    model = load(model_joblib)
     modelname = method
 
-    scoring = dict(
-        Accuracy="accuracy",
-        tp=make_scorer(utils.tp),
-        tn=make_scorer(utils.tn),
-        fp=make_scorer(utils.fp),
-        fn=make_scorer(utils.fn),
-        balanced_accuracy=make_scorer(balanced_accuracy_score),
-        f1score=make_scorer(f1_score),
-        roc_auc=make_scorer(roc_auc_score),
-    )
+    if mode == "Classification":
+        scoring = dict(
+            Accuracy="accuracy",
+            tp=make_scorer(utils.tp),
+            tn=make_scorer(utils.tn),
+            fp=make_scorer(utils.fp),
+            fn=make_scorer(utils.fn),
+            balanced_accuracy=make_scorer(balanced_accuracy_score),
+            f1score=make_scorer(f1_score),
+            roc_auc=make_scorer(roc_auc_score),
+        )
+
+    if mode == "MIC":
+        scoring = dict(
+            mean_squared_error="neg_mean_squared_error",
+            r2_score="r2",
+        )
 
     if optimization != "None":
         print("Hyper-parameter Tuning")
@@ -90,7 +107,7 @@ def model_fitting(
         grid.fit(X_train, y_train)
         print("Best params: {}".format(grid.best_params_))
 
-        filename = model
+        filename = model_joblib
         filename = filename.replace(".joblib", "_grid.joblib")
         print("Saving grid model to {0}".format(filename))
         dump(grid, filename)

@@ -69,7 +69,7 @@ def main():
     print("Fitting training data")
     start_time = time.time()
     clf, best_parameters = model_fitting(
-        drug, X_train, y_train, method, model, optimization, config_file, output_file
+        drug, X_train, y_train, mode, method, model, optimization, config_file, output_file
     )
     end_time = time.time()
     print("_______________________________")
