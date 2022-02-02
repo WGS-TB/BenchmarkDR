@@ -1,6 +1,6 @@
 TrainTestSplit:
   random_state: &seed 33
-  test_size: 0.5
+  test_size: 0.2
   shuffle: True
 
 SplitterClass:
@@ -11,7 +11,7 @@ SplitterClass:
     random_state: 8
 
 CrossValidation:
-  refit: 'balanced_accuracy'
+  refit: 'mean_squared_error'
   n_jobs: 8
   return_train_score: True
   verbose: 2
@@ -47,7 +47,7 @@ Models:
 
   LR_elasticnet:
     module: sklearn.linear_model
-    model: ElasticNet
+    model: LogisticRegression
     params:
       penalty: 'elasticnet'
       solver: 'saga'
@@ -270,14 +270,3 @@ Models:
     cv:   
       loss: ['hinge', 'log']
       alpha: np.logspace(-4, 0, base=10, num=5)
-
-
-
-
-
-
-
-
-
-
-

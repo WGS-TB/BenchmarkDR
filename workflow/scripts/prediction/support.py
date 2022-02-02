@@ -77,7 +77,17 @@ def model_fitting(
 
     if optimization != "None":
         print("Hyper-parameter Tuning")
+
+        # The following statement is necessary for methods without parameter, e.g. Linear Regression
+        if config_file["Models"][modelname].get("cv") is None:
+            print("Not running hyper-parameter tuning")
+            clf = model.fit(X_train, y_train)
+            print("_______________________________")
+
+            return clf, str(model.get_params())
+
         param_grid = config_file["Models"][modelname]["cv"]
+
         for key, value in param_grid.items():
             if isinstance(value, str):
                 param_grid[key] = eval(param_grid[key])
