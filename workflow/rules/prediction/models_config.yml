@@ -270,27 +270,27 @@ Models:
       max_iter: np.logspace(1, 5, base=10, num=5)
       C: np.logspace(-4, 4, base=10, num=5)
 
-    sklearn_GBTR:
-      module: sklearn.ensemble
-      model: GradientBoostingRegressor
-      params:
-        max_features: 'auto'
-        n_iter_no_change: 20
-      cv:
-        learning_rate: [0.001, 0.01, 0.1, 1]
-        n_estimators: [100, 300, 500, 1000]
-        min_samples_split: [2, 5, 10, 15]
-        max_depth: [5, 10, 15, 30]
+  sklearn_GBTR:
+    module: sklearn.ensemble
+    model: GradientBoostingRegressor
+    params:
+      max_features: 'auto'
+      n_iter_no_change: 20
+    cv:
+      learning_rate: [0.001, 0.01, 0.1, 1]
+      n_estimators: [100, 300, 500, 1000]
+      min_samples_split: [2, 5, 10, 15]
+      max_depth: [5, 10, 15, 30]
 
-    sklearn_RFR:
-      module: sklearn.ensemble
-      model: RandomForestRegressor
-      params:
-        n_jobs: -1
-      cv:
-        n_estimators: [100, 300, 500, 1000]
-        max_depth: [5, 10, 15, 30]
-        min_samples_split: [2, 5, 10, 15]
-        min_samples_leaf: [1, 2, 5, 10]
+  sklearn_RFR:
+    module: sklearn.ensemble
+    model: RandomForestRegressor
+    params:
+      n_jobs: -1
+    cv:
+      n_estimators: [100, 300, 500, 1000]
+      max_depth: [5, 10, 15, 30]
+      min_samples_split: [2, 5, 10, 15]
+      min_samples_leaf: [1, 2, 5, 10]
 
   

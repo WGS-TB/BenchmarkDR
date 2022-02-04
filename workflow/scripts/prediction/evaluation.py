@@ -70,7 +70,15 @@ def main():
     print("Fitting training data")
     start_time = time.time()
     clf, best_parameters = model_fitting(
-        drug, X_train, y_train, mode, method, model, optimization, config_file, output_file
+        drug,
+        X_train,
+        y_train,
+        mode,
+        method,
+        model,
+        optimization,
+        config_file,
+        output_file,
     )
     end_time = time.time()
     print("_______________________________")
@@ -87,7 +95,10 @@ def main():
 
     if mode == "MIC":
         result = evaluate_regression(y_test, y_pred)
-        output_file_regression_test_values = output_file.rsplit(".")[0] + "_regression_test_values.csv")
+        output_file_regression_test_values = (
+            output_file.rsplit(".")[0] + "_regression_test_values.csv"
+        )
+
         save_regression_test_values(y_test, y_pred, output_file_regression_test_values)
 
     result.insert(0, "Method", method)

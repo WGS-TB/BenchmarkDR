@@ -1,15 +1,15 @@
-PATH_DATA: "/rds/general/user/ns1920/projects/bacterial_datasets/live/pipeline_data" # specifiy path to folder where data is stored (only folder name, no / afterwards)
+PATH_DATA: "/rds/general/user/ns1920/home/bacterial_data"
 
-BACTERIA: ["test_bacterium"]
+BACTERIA: ["synthetic_gherard"]
 
-OUTPUT_DIR: "/rds/general/user/ns1920/projects/bacterial_datasets/ephemeral/pipeline_output"
+OUTPUT_DIR:  "/rds/general/user/ns1920/home/bacterial_data/synthetic_gherard/output"
 
-REPRESENTATION: ["gene_presence_absence"] # 'snps', 'gene_presence_absence'
+REPRESENTATION: ["matrix_all_features", "matrix_snps", "matrix_lineages"]
 
 MODE: "MIC" # "Classification"
 
-DRUGS: ["amikacin"]
+DRUGS: ["midpoint_quantiles", "midpoint_manual"]
 
-METHODS: ["sklearn_LinR", "sklearn_LinR_l1", "sklearn_LinR_l2", "sklearn_LinR_elasticnet", "sklearn_SVMR", "INGOT"] #Classification ["sklearn_LR_l1", "sklearn_LR_l2", "sklearn_LR_elasticnet", "sklearn_SGD_l1", "sklearn_SGD_l2", "sklearn_SGD_elasticnet", "sklearn_DT", "sklearn_RFC", "sklearn_ET", "sklearn_ADB", "sklearn_GBTC", "sklearn_GNB", "sklearn_CNB", "sklearn_SVM_l1", "sklearn_SVM_l2", "sklearn_KNN"]
+METHODS: ["sklearn_LinR", "sklearn_LinR_l1", "sklearn_LinR_l2", "sklearn_LinR_elasticnet", "sklearn_SVMR", "sklearn_GBTR", "sklearn_RFR"] #Classification ["sklearn_LR_l1", "sklearn_LR_l2", "sklearn_LR_elasticnet", "sklearn_SGD_l1", "sklearn_SGD_l2", "sklearn_SGD_elasticnet", "sklearn_DT", "sklearn_RFC", "sklearn_ET", "sklearn_ADB", "sklearn_GBTC", "sklearn_GNB", "sklearn_CNB", "sklearn_SVM_l1", "sklearn_SVM_l2", "sklearn_KNN", "INGOT"]
 
-OPTIMIZATION: 'None' # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
+OPTIMIZATION: "RandomizedSearchCV" # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
