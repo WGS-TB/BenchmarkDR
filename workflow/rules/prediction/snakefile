@@ -29,7 +29,9 @@ rule evaluation_sklearn:
         drug="{drug}",
     output:
         output_dir
-        + "{bacterium}/prediction/results/{representation}/{method,sklearn_*}-{drug}.csv",
+        + "{bacterium}/prediction/results/{representation}/{method}-{drug}.csv",
+    wildcard_constraints:
+        method = "sklearn_.*"
     conda:
         "../../envs/prediction/env.yml"
     threads: 8
