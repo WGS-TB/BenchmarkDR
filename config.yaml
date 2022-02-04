@@ -10,6 +10,6 @@ MODE: "MIC" # "Classification"
 
 DRUGS: ["amikacin"]
 
-METHODS: ["sklearn_LinR", "sklearn_LinR_l1", "sklearn_LinR_l2", "sklearn_LinR_elasticnet", "sklearn_SVMR", "INGOT"] #Classification ["sklearn_LR_l1", "sklearn_LR_l2", "sklearn_LR_elasticnet", "sklearn_SGD_l1", "sklearn_SGD_l2", "sklearn_SGD_elasticnet", "sklearn_DT", "sklearn_RF", "sklearn_ET", "sklearn_ADB", "sklearn_GBT", "sklearn_GNB", "sklearn_CNB", "sklearn_SVM_l1", "sklearn_SVM_l2", "sklearn_KNN"]
+METHODS: ["sklearn_LinR", "sklearn_LinR_l1", "sklearn_LinR_l2", "sklearn_LinR_elasticnet", "sklearn_SVMR", "INGOT"] #Classification ["sklearn_LR_l1", "sklearn_LR_l2", "sklearn_LR_elasticnet", "sklearn_SGD_l1", "sklearn_SGD_l2", "sklearn_SGD_elasticnet", "sklearn_DT", "sklearn_RFC", "sklearn_ET", "sklearn_ADB", "sklearn_GBTC", "sklearn_GNB", "sklearn_CNB", "sklearn_SVM_l1", "sklearn_SVM_l2", "sklearn_KNN"]
 
 OPTIMIZATION: 'None' # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
