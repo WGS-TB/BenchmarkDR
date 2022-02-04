@@ -173,6 +173,11 @@ def evaluate_classifier(y_test, y_pred):
 
     return result
 
+def save_regression_test_values(y_test, y_pred, filename):
+    dict_values = {"y_test": y_test, "y_predicted": y_pred}
+    df_values = pd.DataFrame.from_dict(dict_values)
+    df_values.to_csv(filename, index=False)
+
 
 def evaluate_regression(y_test, y_pred):
     from sklearn.metrics import mean_squared_error, mean_squared_log_error, r2_score
