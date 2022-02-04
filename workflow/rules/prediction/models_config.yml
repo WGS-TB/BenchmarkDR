@@ -18,9 +18,14 @@ CrossValidation:
 
 Models:
 
-# Classification (Resistant/ Susceptible)
+###########################################
+# Classification (Resistant/ Susceptible) #
+###########################################
 
-  LR_l1:
+# Methods included in the Scikit-Learn Package 
+# For further information, please refer to https://scikit-learn.org/stable/supervised_learning.html#supervised-learning 
+  
+  sklearn_LR_l1:
     module: sklearn.linear_model
     model: LogisticRegression
     params:
@@ -33,7 +38,7 @@ Models:
       solver: ['liblinear', 'saga']
       C: np.logspace(-4, 4, base=10, num=5)
 
-  LR_l2:
+  sklearn_LR_l2:
     module: sklearn.linear_model
     model: LogisticRegression
     params:
@@ -45,7 +50,7 @@ Models:
       solver: ['newton-cg','sag','lbfgs']
       C: np.logspace(-4, 4, base=10, num=5)
 
-  LR_elasticnet:
+  sklearn_LR_elasticnet:
     module: sklearn.linear_model
     model: LogisticRegression
     params:
@@ -58,7 +63,7 @@ Models:
       l1_ratio: [0.25, 0.5, 0.75]
       C: np.logspace(-4, 4, base=10, num=5)
 
-  SVM_l1:
+  sklearn_SVM_l1:
     module: sklearn.svm
     model: LinearSVC
     params:
@@ -70,7 +75,7 @@ Models:
       loss: ['squared_hinge']
       C: np.logspace(-4, 4, base=10, num=5)
 
-  SVM_l2:
+  sklearn_SVM_l2:
     module: sklearn.svm
     model: LinearSVC
     params:
@@ -81,7 +86,7 @@ Models:
       loss: ['squared_hinge','hinge']
       C: np.logspace(-4, 4, base=10, num=5)
 
-  RF:
+  sklearn_RFC:
     module: sklearn.ensemble
     model: RandomForestClassifier
     params:
@@ -93,7 +98,7 @@ Models:
       min_samples_split: [2, 5, 10, 15]
       min_samples_leaf: [1, 2, 5, 10]
 
-  DT:
+  sklearn_DT:
     module: sklearn.tree
     model: DecisionTreeClassifier
     params:
@@ -104,7 +109,7 @@ Models:
       min_samples_split: [2, 5, 10, 15]
       min_samples_leaf: [1, 2, 5, 10]
   
-  ET:
+  sklearn_ET:
     module: sklearn.ensemble
     model: ExtraTreesClassifier
     params:
@@ -116,7 +121,7 @@ Models:
       min_samples_split: [2, 5, 10, 15]
       min_samples_leaf: [1, 2, 5, 10]
 
-  ADB:
+  sklearn_ADB:
     module: sklearn.ensemble
     model: AdaBoostClassifier
     params:
@@ -126,18 +131,19 @@ Models:
       n_estimators: [50, 100, 500, 1000]
       learning_rate: [0.0001, 0.001, 0.01, 0.1, 1.0]
 
-  GBT:
+  sklearn_GBTC:
     module: sklearn.ensemble
     model: GradientBoostingClassifier
     params:
       max_features: 'auto'
+      n_iter_no_change: 20
     cv:
       learning_rate: [0.001, 0.01, 0.1, 1]
       n_estimators: [100, 300, 500, 1000]
       min_samples_split: [2, 5, 10, 15]
       max_depth: [5, 10, 15, 30]
 
-  SGDC_l1:
+  sklearn_SGDC_l1:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
@@ -149,7 +155,7 @@ Models:
       loss: ['hinge', 'log']
       alpha: np.logspace(-4, 0, base=10, num=5)
 
-  SGDC_l2:
+  sklearn_SGDC_l2:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
@@ -161,7 +167,7 @@ Models:
       loss: ['hinge', 'log']
       alpha: np.logspace(-4, 0, base=10, num=5)
     
-  SGDC_elasticnet:
+  sklearn_SGDC_elasticnet:
     module: sklearn.linear_model
     model: SGDClassifier
     params:
@@ -174,7 +180,7 @@ Models:
       alpha: np.logspace(-4, 0, base=10, num=5)
       l1_ratio: [0.25, 0.5, 0.75]
 
-  KNN:
+  sklearn_KNN:
     module: sklearn.neighbors
     model: KNeighborsClassifier
     params:
@@ -185,7 +191,7 @@ Models:
       p: [1,2]
       weights: ['uniform', 'distance']
 
-  GNB:
+  sklearn_GNB:
     module: sklearn.naive_bayes
     model: GaussianNB
     params:
@@ -193,7 +199,7 @@ Models:
     cv:
       var_smoothing: np.logspace(-9, 0, base=10, num=10)
   
-  CNB:
+  sklearn_CNB:
     module: sklearn.naive_bayes
     model: ComplementNB
     params:
@@ -202,9 +208,9 @@ Models:
       alpha: [0.01, 0.1, 0.5, 1.0, 10.0]
       norm: [False, True]
       
-  
+# Other Methods
+
   INGOT:
-  # need to manually install via 'pip install ingotdr'
     module: ingot
     model: INGOTClassifier
     params:
@@ -217,15 +223,20 @@ Models:
       lambda_p: [0.01, 0.1, 1, 10, 100]
       lambda_z: [0.01, 0.1, 1, 10, 100]
 
-# Regression (Minimum Inhibitory Concentration)
+#################################################
+# Regression (Minimum Inhibitory Concentration) #
+#################################################
 
-  LinR:
+# Methods included in the Scikit-Learn Package 
+# For further information, please refer to https://scikit-learn.org/stable/supervised_learning.html#supervised-learning 
+  
+  sklearn_LinR:
     module: sklearn.linear_model
     model: LinearRegression
     params:
       normalize: False
 
-  LinR_l1:
+  sklearn_LinR_l1:
     module: sklearn.linear_model
     model: Lasso
     params:
@@ -233,7 +244,7 @@ Models:
     cv:
       alpha: [0.5, 1, 2]   
 
-  LinR_l2:
+  sklearn_LinR_l2:
     module: sklearn.linear_model
     model: Ridge
     params:
@@ -241,7 +252,7 @@ Models:
     cv:
       alpha: [0.5, 1, 2]
 
-  LinR_elasticnet:
+  sklearn_LinR_elasticnet:
     module: sklearn.linear_model
     model: ElasticNet
     params:
@@ -250,7 +261,7 @@ Models:
       alpha: [0.5, 1, 2]
       l1_ratio: [0.25, 0.5, 0.75]
 
-  SVMR:
+  sklearn_SVMR:
     module: sklearn.svm
     model: SVR
     params:
@@ -258,15 +269,28 @@ Models:
     cv:
       max_iter: np.logspace(1, 5, base=10, num=5)
       C: np.logspace(-4, 4, base=10, num=5)
+
+    sklearn_GBTR:
+      module: sklearn.ensemble
+      model: GradientBoostingRegressor
+      params:
+        max_features: 'auto'
+        n_iter_no_change: 20
+      cv:
+        learning_rate: [0.001, 0.01, 0.1, 1]
+        n_estimators: [100, 300, 500, 1000]
+        min_samples_split: [2, 5, 10, 15]
+        max_depth: [5, 10, 15, 30]
+
+    sklearn_RFR:
+      module: sklearn.ensemble
+      model: RandomForestRegressor
+      params:
+        n_jobs: -1
+      cv:
+        n_estimators: [100, 300, 500, 1000]
+        max_depth: [5, 10, 15, 30]
+        min_samples_split: [2, 5, 10, 15]
+        min_samples_leaf: [1, 2, 5, 10]
+
   
-#How to structure this?
-  SGDR_l1:
-    module: sklearn.linear_model
-    model: SGDRegressor
-    params:
-      penalty: ['l1']
-      n_jobs: -1
-      max_iter: 1000
-    cv:   
-      loss: ['hinge', 'log']
-      alpha: np.logspace(-4, 0, base=10, num=5)
