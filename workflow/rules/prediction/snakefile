@@ -19,7 +19,7 @@ rule build_model:
         "python workflow/scripts/prediction/build_model.py --config {input.conf} --model-name {wildcards.method} --outfile {output}"
 
 
-rule evaluation:
+rule evaluation_sklearn:
     input:
         data=output_dir + "{bacterium}/representation/{representation}/0_matrix.csv",
         label=path_data + "{bacterium}/AllLabels.csv",
@@ -29,13 +29,21 @@ rule evaluation:
         drug="{drug}",
     output:
         output_dir
-        + "{bacterium}/prediction/results/{representation}/{method}-{drug}.csv",
+        + "{bacterium}/prediction/results/{representation}/{method,sklearn_*}-{drug}.csv",
     conda:
         "../../envs/prediction/env.yml"
     threads: 8
     script:
         "../../scripts/prediction/evaluation.py"
 
+use rule evaluation_sklearn as evaluation_ingot with:
+    input:
+        model=output_dir + "{bacterium}/prediction/models/INGOT.joblib",
+    output:
+        output_dir
+        + "{bacterium}/prediction/results/{representation}/INGOT-{drug}.csv",
+    conda:
+        "../../envs/prediction/ingot.yml"
 
 rule aggregate_summary:
     input:

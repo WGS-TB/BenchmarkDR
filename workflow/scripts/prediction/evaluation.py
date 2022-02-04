@@ -28,6 +28,7 @@ def main():
         model_fitting,
         evaluate_classifier,
         evaluate_regression,
+        save_regression_test_values,
     )
 
     data, labels = preprocess(data=data_file, label=labels_file)
@@ -81,10 +82,13 @@ def main():
     print("Evaluating")
 
     if mode == "Classification":
+        output_file.split("csv")
         result = evaluate_classifier(y_test, y_pred)
 
     if mode == "MIC":
         result = evaluate_regression(y_test, y_pred)
+        output_file_regression_test_values = output_file.rsplit(".")[0] + "_regression_test_values.csv")
+        save_regression_test_values(y_test, y_pred, output_file_regression_test_values)
 
     result.insert(0, "Method", method)
     result.insert(1, "Parameters", best_parameters)
