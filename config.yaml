@@ -10,6 +10,6 @@ MODE: "MIC" # "Classification"
 
 DRUGS: ["amikacin"]
 
-METHODS: ["LinR", "LinR_l1", "LinR_l2", "LinR_elasticnet", "SVMR"] #Classification ["LR_l1", "LR_l2", "LR_elasticnet", "SGD_l1", "SGD_l2", "SGD_elasticnet", "DT", "RF", "ET", "ADB", "GBT", "GNB", "CNB", "SVM_l1", "SVM_l2", "KNN"]
+METHODS: ["sklearn_LinR", "sklearn_LinR_l1", "sklearn_LinR_l2", "sklearn_LinR_elasticnet", "sklearn_SVMR", "INGOT"] #Classification ["sklearn_LR_l1", "sklearn_LR_l2", "sklearn_LR_elasticnet", "sklearn_SGD_l1", "sklearn_SGD_l2", "sklearn_SGD_elasticnet", "sklearn_DT", "sklearn_RF", "sklearn_ET", "sklearn_ADB", "sklearn_GBT", "sklearn_GNB", "sklearn_CNB", "sklearn_SVM_l1", "sklearn_SVM_l2", "sklearn_KNN"]
 
 OPTIMIZATION: 'None' # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
