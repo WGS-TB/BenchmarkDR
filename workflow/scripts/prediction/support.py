@@ -72,13 +72,14 @@ def model_fitting(
     if mode == "MIC":
         scoring = dict(
             mean_squared_error="neg_mean_squared_error",
+            mean_squared_log_error ="neg_mean_squared_log_error",
             r2_score="r2",
         )
 
     if optimization != "None":
         print("Hyper-parameter Tuning")
 
-        # The following statement is necessary for methods without parameter, e.g. Linear Regression
+        # The following statement is necessary for methods without parameters to tune, e.g. Linear Regression
         if config_file["Models"][modelname].get("cv") is None:
             print("Not running hyper-parameter tuning")
             clf = model.fit(X_train, y_train)
@@ -174,12 +175,13 @@ def evaluate_classifier(y_test, y_pred):
 
 
 def evaluate_regression(y_test, y_pred):
-    from sklearn.metrics import mean_squared_error, r2_score
+    from sklearn.metrics import mean_squared_error, mean_squared_log_error, r2_score
 
     mse = mean_squared_error(y_test, y_pred)
+    msle = mean_squared_log_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
 
-    result = dict(mean_squared_error=mse, r2_score=r2)
+    result = dict(mean_squared_error=mse, mean_squared_log_error=msle, r2_score=r2)
     result = pd.DataFrame([result])
 
     return result
