@@ -11,7 +11,7 @@ SplitterClass:
     random_state: 8
 
 CrossValidation:
-  refit: 'mean_squared_error'
+  refit: 'mean_squared_log_error'
   n_jobs: 8
   return_train_score: True
   verbose: 2
