@@ -38,7 +38,7 @@ genes_reference = set(
 
 ## rows = strains, columns = genes
 
-df_matrix = pd.DataFrame()
+dict_dfs = {}
 
 for file in file_list:
 
@@ -51,8 +51,9 @@ for file in file_list:
     )
 
     df_strain = create_strain_df(strain_id, genes_reference, genes_strain)
-    df_matrix = df_matrix.append(df_strain)
+    dict_dfs[strain_id] = df_strain
 
+df_matrix = pd.concat([df for df in dict_dfs.values()])
 df_matrix.fillna(value=0, inplace=True)
 
 df_matrix.to_csv(output_file)

@@ -3,7 +3,7 @@ import pandas as pd
 file_list = snakemake.input
 output_file = snakemake.output
 
-matrix_df = pd.DataFrame()
+dict_dfs = {}
 
 for file in file_list:
 
@@ -16,9 +16,9 @@ for file in file_list:
     strain_data = strain_data[1:]
     strain_data.index = [strain_id]
 
-    matrix_df = matrix_df.append(strain_data)
-    print(file)
+    dict_dfs[strain_id] = df_strain
 
+df_matrix = pd.concat([df for df in dict_dfs.values()])
 matrix_df.fillna(value=0, inplace=True)
 matrix_df.reset_index(inplace=True)
 

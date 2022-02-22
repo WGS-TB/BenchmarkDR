@@ -4,7 +4,7 @@ import numpy as np
 file_list = snakemake.input
 output_file = str(snakemake.output)
 
-matrix_df = pd.DataFrame()
+dict_dfs = {}
 
 for file in file_list:
 
@@ -19,8 +19,9 @@ for file in file_list:
     strain_data.index = strain_data["Chrom"] + "_" + strain_data["Position"].astype(str)
     strain_data[strain_id] = np.ones(len(strain_data.index), dtype=np.int8)
 
-    matrix_df = matrix_df.append(strain_data[strain_id].T)
+    dict_dfs[strain_id] = df_strain
 
+df_matrix = pd.concat([df for df in dict_dfs.values()], axis=1).T
 matrix_df.fillna(value=0, inplace=True)
 
 matrix_df.to_csv(output_file)
