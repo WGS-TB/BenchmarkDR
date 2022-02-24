@@ -1,14 +1,14 @@
 PATH_DATA: "/rds/general/user/ns1920/home/bacterial_data"
 
-BACTERIA: ["synthetic_gherard"]
+BACTERIA: ["pneumonia_mic"]
 
-OUTPUT_DIR:  "/rds/general/user/ns1920/home/bacterial_data/synthetic_gherard/output"
+OUTPUT_DIR:  "/rds/general/user/ns1920/home/pipeline_output"
 
-REPRESENTATION: ["matrix_all_features", "matrix_snps", "matrix_lineages"]
+REPRESENTATION: ["gene_presence_absence", "snps"] # "kmer"
 
 MODE: "MIC" # "Classification"
 
-DRUGS: ["midpoint_quantiles", "midpoint_manual"]
+DRUGS: ["CIP"]
 
 METHODS: ["sklearn_LinR", "sklearn_LinR_l1", "sklearn_LinR_l2", "sklearn_LinR_elasticnet", "sklearn_SVMR", "sklearn_GBTR", "sklearn_RFR"] #Classification ["sklearn_LR_l1", "sklearn_LR_l2", "sklearn_LR_elasticnet", "sklearn_SGD_l1", "sklearn_SGD_l2", "sklearn_SGD_elasticnet", "sklearn_DT", "sklearn_RFC", "sklearn_ET", "sklearn_ADB", "sklearn_GBTC", "sklearn_GNB", "sklearn_CNB", "sklearn_SVM_l1", "sklearn_SVM_l2", "sklearn_KNN", "INGOT"]
 
