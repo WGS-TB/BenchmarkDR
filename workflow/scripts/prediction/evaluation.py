@@ -17,10 +17,12 @@ representation = snakemake.wildcards.representation
 mode = snakemake.config["MODE"]
 optimization = snakemake.config["OPTIMIZATION"]
 
-output_file = str(snakemake.output)
+output_evaluation = snakemake.output["evaluation"]
+output_fitted_model = snakemake.output["fitted_model"]
 
 
 def main():
+    from joblib import load
     from sklearn.model_selection import train_test_split
     from skopt import BayesSearchCV
     from support import (
@@ -81,6 +83,7 @@ def main():
         output_file,
     )
     end_time = time.time()
+    dump(clf, output_fitted_model)
     print("_______________________________")
 
     print("Testing")

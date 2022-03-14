@@ -28,8 +28,10 @@ rule evaluation_sklearn:
     params:
         drug="{drug}",
     output:
-        output_dir
+        evaluation = output_dir
         + "{bacterium}/prediction/results/{representation}/{method}-{drug}.csv",
+        fitted_model = output_dir
+        + "{bacterium}/prediction/results/fitted_models/{representation}/{method}-{drug}.joblib",
     wildcard_constraints:
         method = "sklearn_.*"
     conda:
