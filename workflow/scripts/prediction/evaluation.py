@@ -22,7 +22,7 @@ output_fitted_model = snakemake.output["fitted_model"]
 
 
 def main():
-    from joblib import load
+    from joblib import dump
     from sklearn.model_selection import train_test_split
     from skopt import BayesSearchCV
     from support import (
@@ -80,7 +80,7 @@ def main():
         model,
         optimization,
         config_file,
-        output_file,
+        output_evaluation,
     )
     end_time = time.time()
     dump(clf, output_fitted_model)
@@ -93,13 +93,13 @@ def main():
     print("Evaluating")
 
     if mode == "Classification":
-        output_file.split("csv")
+        output_evaluation.split("csv")
         result = evaluate_classifier(y_test, y_pred)
 
     if mode == "MIC":
         result = evaluate_regression(y_test, y_pred)
         output_file_regression_test_values = (
-            output_file.rsplit(".")[0] + "_regression_test_values.csv"
+            output_evaluation.rsplit(".")[0] + "_regression_test_values.csv"
         )
 
         save_regression_test_values(y_test, y_pred, output_file_regression_test_values)
@@ -113,8 +113,8 @@ def main():
     results = results.append(result)
     print("_______________________________")
 
-    print("Saving results to {0}".format(output_file))
-    results.to_csv(output_file, index=False)
+    print("Saving results to {0}".format(output_evaluation))
+    results.to_csv(output_evaluation, index=False)
 
 
 main()
