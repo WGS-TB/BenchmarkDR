@@ -1,10 +1,10 @@
-PATH_DATA: "/rds/general/user/ns1920/home/bacterial_data"
+PATH_DATA: "/rds/general/user/ns1920/home/prototype/data"
 
-BACTERIA: ["pneumonia_mic"]
+BACTERIA: ["test_mic_2"]
 
-OUTPUT_DIR:  "/rds/general/user/ns1920/home/pipeline_output"
+OUTPUT_DIR:  "/rds/general/user/ns1920/home/prototype/data/test_output"
 
-REPRESENTATION: ["gene_presence_absence", "snps"] # "kmer"
+REPRESENTATION: ["gene_presence_absence"] # "kmer"
 
 MODE: "MIC" # "Classification"
 
@@ -12,4 +12,4 @@ DRUGS: ["CIP"]
 
 METHODS: ["sklearn_LinR", "sklearn_LinR_l1", "sklearn_LinR_l2", "sklearn_LinR_elasticnet", "sklearn_SVMR", "sklearn_GBTR", "sklearn_RFR"] #Classification ["sklearn_LR_l1", "sklearn_LR_l2", "sklearn_LR_elasticnet", "sklearn_SGD_l1", "sklearn_SGD_l2", "sklearn_SGD_elasticnet", "sklearn_DT", "sklearn_RFC", "sklearn_ET", "sklearn_ADB", "sklearn_GBTC", "sklearn_GNB", "sklearn_CNB", "sklearn_SVM_l1", "sklearn_SVM_l2", "sklearn_KNN", "INGOT"]
 
-OPTIMIZATION: "RandomizedSearchCV" # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "none"
+OPTIMIZATION: "None" # 'GridSearchCV', 'RandomizedSearchCV', 'BayesSearchCV' and "None"
