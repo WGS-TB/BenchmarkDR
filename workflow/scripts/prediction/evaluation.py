@@ -4,6 +4,7 @@ import time
 import pandas as pd
 import utils
 import os
+from scipy import sparse
 
 data_file = snakemake.input["data"]
 labels_file = snakemake.input["label"]
@@ -54,6 +55,8 @@ def main():
 
     X = data
     X = X.loc[~na_index, :]
+    X = sparse.csr_matrix(X)
+
 
     print("Data shape: {}".format(X.shape))
     print("Label shape: {}".format(y.shape))
