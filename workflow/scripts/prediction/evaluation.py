@@ -1,9 +1,8 @@
-import argparse
+import sys
 import numpy as np
 import time
 import pandas as pd
 import utils
-import os
 from scipy import sparse
 
 data_file = snakemake.input["data"]
@@ -57,15 +56,27 @@ def main():
     X = X.loc[~na_index, :]
     X = sparse.csr_matrix(X)
 
-
     print("Data shape: {}".format(X.shape))
     print("Label shape: {}".format(y.shape))
     print("_______________________________")
 
     print("Train-Test split")
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y, **config_file["TrainTestSplit"]
-    )
+    # Make sure that stratified split is disabled for regression models
+
+    
+    if mode == "Classification":
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, **config_file["TrainTestSplit"]
+        )
+
+    if mode == "MIC":
+        dict_train_test_split = config_file["TrainTestSplit"]
+        dict_train_test_split["stratify"] = None
+        print(dict_train_test_split)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, **dict_train_test_split
+        )
+
     print("Train data shape: {}".format(X_train.shape))
     print("Train label shape: {}".format(y_train.shape))
     print("Test data shape: {}".format(X_test.shape))
