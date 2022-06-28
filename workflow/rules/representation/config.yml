@@ -1,0 +1,8 @@
+# Use this config file for representation related configurations
+
+kmer_count:
+    kmer_length: 31
+    memory: 12
+    min_count: 1
+    max_count: 999999
+    canonical_form: True
