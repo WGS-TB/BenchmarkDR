@@ -52,7 +52,7 @@ REPRESENTATION: ["gene_presence_absence", "snps"] # "kmer"
 
 MODE: "MIC" # "Classification"
 
-DRUGS: ["drug_1", ...] Columns names of in your AllLabels.csv file
+DRUGS: ["drug_1", ...] Column names of in your AllLabels.csv file
 
 METHODS: ["sklearn_LinR", "sklearn_LinR_l1", "sklearn_LinR_l2", "sklearn_LinR_elasticnet", "sklearn_SVMR", "sklearn_GBTR", "sklearn_RFR"] #Classification ["sklearn_LR_l1", "sklearn_LR_l2", "sklearn_LR_elasticnet", "sklearn_SGD_l1", "sklearn_SGD_l2", "sklearn_SGD_elasticnet", "sklearn_DT", "sklearn_RFC", "sklearn_ET", "sklearn_ADB", "sklearn_GBTC", "sklearn_GNB", "sklearn_CNB", "sklearn_SVM_l1", "sklearn_SVM_l2", "sklearn_KNN", "INGOT"]
 
