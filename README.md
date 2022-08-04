@@ -14,30 +14,31 @@ mamba create -c conda-forge -c bioconda -n snakemake snakemake
 ## Usage
 
 To run the pipeline on your own data, you have to structure your input data (bacterial read and labels) in following way:
-
-your_bacterium_1
-|
-|---- data (place paired-end short reads here)
-|
-|---- reference
-|             |                       
-|             |                       
-|             reference_for_your_bacterium_1.fasta
-|
-|---- AllLabels.csv
+<pre>
+your_bacterium_1  
+|  
+|---- data (place paired-end short reads here)   
+|   
+|---- reference   
+|         |                          
+|         |                          
+|        reference_for_your_bacterium_1.fasta   
+|    
+|---- AllLabels.csv    
 
 
 To adapt configuration of the pipeline, there are different config files. It is necessary to adapt the config in the main folder:
 
-|-- workflow
-|      |--rules
-|      |    |-- prediction
-|      |             |-- models_config
-|      |-- ...  
-|
-|-- config      
-|-- Snakefile
-
+|-- workflow    
+|      |--rules    
+|      |    |-- prediction    
+|      |             |-- models_config     
+|      |             |-- ...
+|      |-- ...      
+|    
+|-- config          
+|-- Snakefile    
+</pre>
 
 ```python
 
